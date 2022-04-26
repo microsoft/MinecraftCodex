@@ -1,0 +1,29 @@
+{   
+    "[javascript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[json]": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "git.ignoreLimitWarning": true,
+    "editor.formatOnSave": true,
+    "cSpell.words": [
+        "gametest",
+        "gametests",
+        "minecart",
+        "shulker",
+        "zoglin"
+    ],
+    "search.exclude": {
+        "**/build": true
+    },
+     "terminal.integrated.env.windows": {
+          "PATH": "${env:PATH};${cwd}\\node_modules\\.bin"
+        }
+}
