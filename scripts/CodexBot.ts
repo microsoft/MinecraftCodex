@@ -14,6 +14,7 @@ import {
   StringBlockProperty,
   BlockPermutation,
   EntityQueryOptions,
+  BlockRecordPlayerComponent,
 } from "mojang-minecraft";
 
 import { SimulatedPlayer } from "mojang-gametest";
@@ -28,12 +29,12 @@ export interface Bot extends SimulatedPlayer {
   jumpUp: () => Promise<void>;
 
   getLocation: () => BlockLocation;
-  navigateLocation: (worldLocation: Location, speed?: number) => Promise<void>;
+  navigateLocation: (worldLocation: Location | Block[], speed?: number) => Promise<void>;
   followEntity: (player: Entity, speed?: number) => Promise<void>;
 
-  findBlock: (type: string, maxRadius: number) => Block[] | undefined;
+  findBlock: (type: string, maxRadius: number) => Block[];
   mineBlock: (block: Block[]) => Promise<boolean>;
-  interactBlock: (block: Block) => boolean;
+  interactBlock: (block: Block[]) => boolean;
   sortClosestBlock: (blocks: Block[]) => Block[];
 
   canCraftItem: (name: string) => boolean;
@@ -74,62 +75,159 @@ export class CodexBot {
     this.simBot.craftItem = this.craftItem.bind(this);
   }
 
-  getLocation(): BlockLocation {
-    return new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
-  }
-
   chat(message: string) {
     this.simBot.runCommand("say " + message);
   }
 
-  getRouteLength(locations: Location[]) {
-    var totalLength = 0;
+  async jumpUp() {
+    this.simBot.jump();
+    await this.codexGame.taskStack.sleep(400);
+  }
 
-    for (let i = 1; i < locations.length; i++) {
-      totalLength += this.getDistance(locations[i - 1], locations[i]);
+  getLocation(): BlockLocation {
+    return new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
+  }
+
+  async navigateLocation(worldLocation: Location | Block[], speed?: number) {
+    if (!speed) {
+      speed = 1;
+    }
+    let dest: Location = new Location(0, 0, 0);
+
+    if (worldLocation instanceof Location) dest = worldLocation;
+    else {
+      {
+        let blockArr = worldLocation as Block[];
+        if (blockArr.length == 0) {
+          this.chat("There is nowhere to go");
+          return;
+        }
+        dest = new Location(blockArr[0].location.x, blockArr[0].location.y, blockArr[0].location.z);
+      }
     }
 
-    return totalLength;
+    let botLoc = this.getLocation();
+    let vector = new Location(dest.x - botLoc.x, dest.y - botLoc.y, dest.z - botLoc.z);
+    let length = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+    let unitVec = new Location(vector.x / length, vector.y / length, vector.z / length);
+
+    //magic number math
+    let numPts = Math.ceil(length) + 1;
+    numPts = Math.ceil(numPts / 2);
+
+    let locations: Location[] = [];
+
+    for (let i = 0; i < numPts; i++) {
+      let point = new BlockLocation(botLoc.x + i * unitVec.x, botLoc.y + i * unitVec.y, botLoc.z + i * unitVec.z);
+      let newPt = this.codexGame.gameTest.relativeBlockLocation(point);
+      locations.push(new Location(newPt.x, newPt.y, newPt.z));
+    }
+    let lastBlockLoc = new BlockLocation(dest.x, dest.y, dest.z);
+    let lastLoc = this.codexGame.gameTest.relativeBlockLocation(lastBlockLoc);
+    locations.push(new Location(lastLoc.x - 0.5, lastLoc.y, lastLoc.z - 0.5));
+
+    // this.chat("Navigating to block " + numPts + " blocks long.");
+    try {
+      this.simBot.navigateToLocations(locations, speed);
+    } catch (e) {
+      this.simBot.chat("An error was thrown!");
+    }
+
+    // wait for a little bit for bot to start moving, then check position until done moving
+    // we ignore the y position because it made sense when writing this code, could be a wrong choice
+    do {
+      await this.codexGame.taskStack.sleep(locations.length * 200 * (1 + (1 - speed)));
+    } while (Math.abs(botLoc.x - lastLoc.x) <= 1 && Math.abs(botLoc.y - lastLoc.y) <= 1);
+
+    //  this.chat("Done navigating!");
   }
 
-  getDistance(start: Location, end: Location): number {
-    let vector = new Vector(start.x - end.x, start.y - end.y, start.z - end.z);
+  async followEntity(player: Entity, speed: number = 0.7) {
+    let botBlockLoc = new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
+    let playerBlockLoc = new BlockLocation(player.location.x, player.location.y, player.location.z);
+    let distance = this.getBlockDistance(botBlockLoc, playerBlockLoc);
 
-    return Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+    this.simBot.navigateToEntity(player, speed);
+
+    await this.codexGame.taskStack.sleep(distance * 200 * (1 + (1 - speed)));
   }
 
-  getBlockDistance(start: BlockLocation, end: BlockLocation): number {
-    let vector = new Vector(start.x - end.x, start.y - end.y, start.z - end.z);
+  // adapted from https://stackoverflow.com/questions/37214057/3d-array-traversal-originating-from-center
+  findBlock(type: string, maxRadius: number = 16, numFind: number = 1): Block[] {
+    let diameter = maxRadius * 2;
+    const start = new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
+    let blocks: Block[] = [];
 
-    return Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
-  }
+    if (!game || !game.overWorld) {
+      return blocks;
+    }
 
-  sortClosestBlock(blocks: Block[]): Block[] {
-    let loc = this.getLocation();
-    blocks.sort((a, b) => {
-      return this.getBlockDistance(a.location, loc) - this.getBlockDistance(b.location, loc);
-    });
+    // we get better results if we have a larger pool of items to sort when we get close to the endpoint
+    // so we always get at least 10, but some types are more limited, so do this on a per type basis
+    if (type === "log") if (numFind < 10) numFind = 10;
+
+    let codexBlockType = BlockConverter.ConvertBlockType(type);
+    let coreBlockType = "minecraft:" + codexBlockType.name;
+
+    var half = Math.ceil(diameter / 2) - 1;
+    for (var d = 0; d <= 3 * half; d++) {
+      for (var x = Math.max(0, d - 2 * half); x <= Math.min(half, d); x++) {
+        for (var y = Math.max(0, d - x - half); y <= Math.min(half, d - x); y++) {
+          diameter % 2
+            ? this.mirrorOdd(x, y, d - x - y, start, blocks, coreBlockType)
+            : this.mirrorEven(x, y, d - x - y, start, blocks, coreBlockType);
+
+          if (blocks.length >= 10) {
+            return blocks;
+          }
+        }
+      }
+    }
+
+    if (blocks.length <= 0) this.chat("I didn't find any blocks of type " + type);
+    else this.chat(`Found ${blocks.length} ${type} blocks`);
 
     return blocks;
   }
+  mirrorEven(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
+    for (var i = 1; i >= 0; --i, x *= -1) {
+      for (var j = 1; j >= 0; --j, y *= -1) {
+        for (var k = 1; k >= 0; --k, z *= -1) {
+          this.checkBlock(x + i, y + j, z + k, start, blocks, coreBlockType);
+        }
+      }
+    }
+  }
 
-  lookBlock(blockLoc: BlockLocation) {
-    let relBlockLoc = this.codexGame.gameTest.relativeBlockLocation(blockLoc);
-    // make sure the bot is facing the block
-    this.simBot.lookAtBlock(relBlockLoc);
+  mirrorOdd(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
+    for (var i = 0; i < (x ? 2 : 1); ++i, x *= -1) {
+      for (var j = 0; j < (y ? 2 : 1); ++j, y *= -1) {
+        for (var k = 0; k < (z ? 2 : 1); ++k, z *= -1) {
+          this.checkBlock(x, y, z, start, blocks, coreBlockType);
+        }
+      }
+    }
+  }
+  checkBlock(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
+    const loc = new BlockLocation(start.x + x, start.y + y, start.z + z);
+    const block = game!.overWorld.getBlock(loc);
+    if (block.type.id === coreBlockType) {
+      blocks.push(block);
+    }
   }
 
   async mineBlock(blockArr: Block[]): Promise<boolean> {
     let botHeadLoc = this.simBot.headLocation;
     let botLoc = this.simBot.location;
 
+    if (blockArr === undefined || blockArr.length === 0) {
+      this.chat("There is nothing to mine");
+      return false;
+    }
+
     let block = blockArr[0];
     let blockLoc = block.location;
 
-    if (block === undefined) {
-      this.chat("There are no blocks to mine");
-      return false;
-    }
     this.chat("Trying to mine!");
 
     // if the block is too high, find one that isn't
@@ -166,19 +264,13 @@ export class CodexBot {
     blockArr.shift();
     blockArr = this.sortClosestBlock(blockArr);
 
-    // this.chat("Mine result: " + result);
-
     return result;
   }
 
-  interactBlock(block: Block): boolean {
-    let blockLoc = block.location;
-
+  lookBlock(blockLoc: BlockLocation) {
+    let relBlockLoc = this.codexGame.gameTest.relativeBlockLocation(blockLoc);
     // make sure the bot is facing the block
-    this.lookBlock(blockLoc);
-
-    let blockLocRel = this.codexGame.gameTest.relativeBlockLocation(blockLoc);
-    return this.simBot.interactWithBlock(blockLocRel);
+    this.simBot.lookAtBlock(relBlockLoc);
   }
 
   async collectNearbyItems(): Promise<number> {
@@ -216,87 +308,31 @@ export class CodexBot {
     return distance;
   }
 
-  getPlayerByName(name: string): Player | undefined {
-    for (let player of this.players) {
-      if (player.name === name) {
-        return player;
-      }
+  // the API always works on the first block in the array
+  interactBlock(blockArr: Block[]): boolean {
+    if (blockArr === undefined || blockArr.length === 0) {
+      this.chat("There is nothing to interact with");
+      return false;
     }
 
-    return undefined;
+    let blockLoc = blockArr[0].location;
+
+    // make sure the bot is facing the block
+    this.lookBlock(blockLoc);
+
+    let blockLocRel = this.codexGame.gameTest.relativeBlockLocation(blockLoc);
+    return this.simBot.interactWithBlock(blockLocRel);
   }
 
-  async jumpUp() {
-    this.simBot.jump();
-    await this.codexGame.taskStack.sleep(400);
-  }
-
-  async navigateLocation(worldLocation: Location | BlockLocation, speed?: number) {
-    if (!speed) {
-      speed = 1;
-    }
-    let dest: Location = new Location(0, 0, 0);
-
-    if (worldLocation instanceof BlockLocation) dest = new Location(worldLocation.x, worldLocation.y, worldLocation.z);
-
-    if (worldLocation instanceof Location) dest = worldLocation;
-
-    let botLoc = this.getLocation();
-    let vector = new Location(dest.x - botLoc.x, dest.y - botLoc.y, dest.z - botLoc.z);
-    let length = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
-    let unitVec = new Location(vector.x / length, vector.y / length, vector.z / length);
-
-    //magic number math
-    let numPts = Math.ceil(length) + 1;
-    numPts = Math.ceil(numPts / 2);
-
-    let locations: Location[] = [];
-
-    for (let i = 0; i < numPts; i++) {
-      let point = new BlockLocation(botLoc.x + i * unitVec.x, botLoc.y + i * unitVec.y, botLoc.z + i * unitVec.z);
-      let newPt = this.codexGame.gameTest.relativeBlockLocation(point);
-      locations.push(new Location(newPt.x, newPt.y, newPt.z));
-    }
-    let lastBlockLoc = new BlockLocation(dest.x, dest.y, dest.z);
-    let lastLoc = this.codexGame.gameTest.relativeBlockLocation(lastBlockLoc);
-    locations.push(new Location(lastLoc.x - 0.5, lastLoc.y, lastLoc.z - 0.5));
-
-    this.chat("Navigating to block " + numPts + " blocks long.");
-    try {
-      this.simBot.navigateToLocations(locations, speed);
-    } catch (e) {
-      this.simBot.chat("An error was thrown!");
+  sortClosestBlock(blocks: Block[]): Block[] {
+    if (blocks && blocks.length > 0) {
+      let loc = this.getLocation();
+      blocks.sort((a, b) => {
+        return this.getBlockDistance(a.location, loc) - this.getBlockDistance(b.location, loc);
+      });
     }
 
-    // wait for a little bit for bot to start moving, then check position until done moving
-    // we ignore the y position because it made sense when writing this code, could be a wrong choice
-    do {
-      await this.codexGame.taskStack.sleep(locations.length * 200 * (1 + (1 - speed)));
-    } while (Math.abs(botLoc.x - lastLoc.x) <= 1 && Math.abs(botLoc.y - lastLoc.y) <= 1);
-
-    this.chat("Done navigating!");
-  }
-
-  async followEntity(player: Entity, speed: number = 0.7) {
-    let botBlockLoc = new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
-    let playerBlockLoc = new BlockLocation(player.location.x, player.location.y, player.location.z);
-    let distance = this.getBlockDistance(botBlockLoc, playerBlockLoc);
-
-    this.simBot.navigateToEntity(player, speed);
-
-    await this.codexGame.taskStack.sleep(distance * 200 * (1 + (1 - speed)));
-  }
-
-  getName() {
-    return this.simBot.name;
-  }
-
-  getPlayerName() {
-    return this.name;
-  }
-
-  _log(m: string) {
-    if (DEBUG) this.simBot.runCommand("say " + m);
+    return blocks;
   }
 
   craftItem(name: string) {
@@ -314,66 +350,47 @@ export class CodexBot {
     }
   }
 
-  mirrorEven(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
-    for (var i = 1; i >= 0; --i, x *= -1) {
-      for (var j = 1; j >= 0; --j, y *= -1) {
-        for (var k = 1; k >= 0; --k, z *= -1) {
-          this.checkBlock(x + i, y + j, z + k, start, blocks, coreBlockType);
-        }
-      }
+  getRouteLength(locations: Location[]) {
+    var totalLength = 0;
+
+    for (let i = 1; i < locations.length; i++) {
+      totalLength += this.getDistance(locations[i - 1], locations[i]);
     }
-  }
-  mirrorOdd(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
-    for (var i = 0; i < (x ? 2 : 1); ++i, x *= -1) {
-      for (var j = 0; j < (y ? 2 : 1); ++j, y *= -1) {
-        for (var k = 0; k < (z ? 2 : 1); ++k, z *= -1) {
-          this.checkBlock(x, y, z, start, blocks, coreBlockType);
-        }
-      }
-    }
-  }
-  checkBlock(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
-    const loc = new BlockLocation(start.x + x, start.y + y, start.z + z);
-    const block = game!.overWorld.getBlock(loc);
-    if (block.type.id === coreBlockType) {
-      blocks.push(block);
-    }
+
+    return totalLength;
   }
 
-  // adapted from https://stackoverflow.com/questions/37214057/3d-array-traversal-originating-from-center
-  findBlock(type: string, maxRadius: number = 16, numFind: number = 1): Block[] | undefined {
-    let diameter = maxRadius * 2;
-    const start = new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
-    if (!game || !game.overWorld) {
-      return undefined;
-    }
+  getDistance(start: Location, end: Location): number {
+    let vector = new Vector(start.x - end.x, start.y - end.y, start.z - end.z);
 
-    // we get better results if we have a larger pool of items to sort when we get close to the endpoint
-    // so we always get at least 10, but some types are more limited, so do this on a per type basis
-    if (type === "log") if (numFind < 10) numFind = 10;
+    return Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+  }
 
-    let codexBlockType = BlockConverter.ConvertBlockType(type);
-    let coreBlockType = "minecraft:" + codexBlockType.name;
+  getBlockDistance(start: BlockLocation, end: BlockLocation): number {
+    let vector = new Vector(start.x - end.x, start.y - end.y, start.z - end.z);
 
-    let blocks: Block[] = [];
+    return Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
+  }
 
-    var half = Math.ceil(diameter / 2) - 1;
-    for (var d = 0; d <= 3 * half; d++) {
-      for (var x = Math.max(0, d - 2 * half); x <= Math.min(half, d); x++) {
-        for (var y = Math.max(0, d - x - half); y <= Math.min(half, d - x); y++) {
-          diameter % 2
-            ? this.mirrorOdd(x, y, d - x - y, start, blocks, coreBlockType)
-            : this.mirrorEven(x, y, d - x - y, start, blocks, coreBlockType);
-
-          if (blocks.length >= 10) {
-            return blocks;
-          }
-        }
+  getPlayerByName(name: string): Player | undefined {
+    for (let player of this.players) {
+      if (player.name === name) {
+        return player;
       }
     }
 
-    if (blocks.length <= 0) return undefined;
-    this.chat(`Found ${blocks.length} ${type} blocks`);
-    return blocks;
+    return undefined;
+  }
+
+  getName() {
+    return this.simBot.name;
+  }
+
+  getPlayerName() {
+    return this.name;
+  }
+
+  _log(m: string) {
+    if (DEBUG) this.simBot.runCommand("say " + m);
   }
 }

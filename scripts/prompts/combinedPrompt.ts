@@ -11,12 +11,12 @@ export let context: Context = {
 // chat(message: string): void - Sends a chat message from the simulated player.
 // listInventory(object: Block | SimulatedPlayer | Player): InventoryComponentContainer - returns a container enumerating all the items a player or treasure chest has
 // getLocation() : BlockLocation - returns the location from the simulated player
-// navigateLocation(worldLocation: Location, speed?: number) : Promise<NavigationResult> - path find through the world to a location
+// navigateLocation(worldLocation: Location : Block, speed?: number) : Promise<NavigationResult> - path find through the world to a location
 // findBlock(type: string, maxRadius: number, numFind : number = 1): Block [] - Returns the an arry of blocks closest to the simulated player of the type given within the radius.
 // folllowEntity(entity: Entity, speed? : number): Promise<void> - Orders the simulated player to move to the given entity.
-// mineBlock(block: Block []) : boolean - simulated player mines a block and places it in their inventory
+// mineBlock(blockArr : Block []) : boolean - simulated player mines a block and places it in their inventory
 // collectNearbyItems() : number - Collects nearby items that may be on the ground - for example, mined ore
-// interactBlock(block: Block) : boolean - have the simulated player interact with a block, like a chest, table, forge, etc
+// interactBlock(blockArr: Block[]) : boolean - have the simulated player interact with a block, like a chest, table, forge, etc
 // sortClosestBlock: (blocks: Block[]) : Block[] - sort the block array by which ones are closest to the simulated player
 // transferItem(fromInventory: InventoryComponentContainer,toInventory: InventoryComponentContainer,name: string, numItems: number = -1): boolean
 // canCraftItem(name: string) : boolean - does the simulated player have the inventory items to craft the requested item?
@@ -135,30 +135,34 @@ else
 
 //find some grass
 state.grassBlocks = bot.findBlock("grass", 16, 10);
-await bot.navigateLocation(state.grassBlocks[0].location);
+await bot.navigateLocation(state.grassBlocks);
 state.grassBlocks = bot.sortClosestBlock(state.grassBlocks);
 bot.chat("What should I do with the grass?")
 
 //mine two grass
-if(!state.grassBlocks || state.grassBlocks[0] === undefined) state.grassBlocks = bot.findBlock("grass", 16, 2);
-await bot.navigateLocation(state.grassBlocks[0].location);
-state.grassBlocks = bot.sortClosestBlock(state.grassBlocks);
-await bot.mineBlock(state.grassBlocks);
-await bot.mineBlock(state.grassBlocks);
-await bot.collectNearbyItems();
+state.grassBlocks = bot.findBlock("grass", 16, 2);
+if(state.grassBlocks[0] != undefined)
+{
+  await bot.navigateLocation(state.grassBlocks);
+  state.grassBlocks = bot.sortClosestBlock(state.grassBlocks);
+  await bot.mineBlock(state.grassBlocks);
+  await bot.mineBlock(state.grassBlocks);
+  await bot.collectNearbyItems();
+}
 
 //get me grass
-await bot.navigateLocation(state.grassBlocks[0].location);
+state.grassBlocks = bot.findBlock("grass", 16, 2);
+await bot.navigateLocation(state.grassBlocks);
 state.grassBlocks = bot.sortClosestBlock(state.grassBlocks);, 
 await bot.mineBlock(state.grassBlocks);
 await bot.collectNearbyItems();
 
 //find and open a chest
-if(!state.chest || state.chest[0] === undefined) state.chest = bot.findBlock("chest", 16, 1);
-await bot.navigateLocation(state.chest[0].location);
-bot.interactBlock(state.chest[0]);
+state.chest = bot.findBlock("chest", 16, 1);
+await bot.navigateLocation(state.chest);
+bot.interactBlock(state.chest);
 
-//what is in the chest
+// tell me what is in the chest
 let inventory = game.listInventory(state.chest[0]);
 let haveItems = false;
 for (let i = 0; i < inventory.size; i++) {
