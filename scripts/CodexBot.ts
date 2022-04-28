@@ -15,6 +15,7 @@ import {
   BlockPermutation,
   EntityQueryOptions,
   BlockRecordPlayerComponent,
+  ItemStack,
 } from "mojang-minecraft";
 
 import { SimulatedPlayer } from "mojang-gametest";
@@ -39,6 +40,7 @@ export interface Bot extends SimulatedPlayer {
 
   canCraftItem: (name: string) => boolean;
   craftItem: (name: string) => void;
+  dropItem: (name: string) => boolean;
   collectNearbyItems: () => Promise<number>;
 }
 
@@ -70,6 +72,7 @@ export class CodexBot {
     this.simBot.collectNearbyItems = this.collectNearbyItems.bind(this);
     this.simBot.interactBlock = this.interactBlock.bind(this);
     this.simBot.sortClosestBlock = this.sortClosestBlock.bind(this);
+    this.simBot.dropItem = this.dropItem.bind(this);
 
     this.simBot.canCraftItem = this.canCraftItem.bind(this);
     this.simBot.craftItem = this.craftItem.bind(this);
@@ -211,6 +214,9 @@ export class CodexBot {
   checkBlock(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
     const loc = new BlockLocation(start.x + x, start.y + y, start.z + z);
     const block = game!.overWorld.getBlock(loc);
+
+    if (block.isEmpty) return;
+
     if (block.type.id === coreBlockType) {
       blocks.push(block);
     }
@@ -232,7 +238,7 @@ export class CodexBot {
 
     // if the block is too high, find one that isn't
     while (blockLoc.y > botHeadLoc.y + 1) {
-      this.chat("The block is too high, I can't reach it");
+      //this.chat("The block is too high, I can't reach it");
       blockArr.shift();
       block = blockArr[0];
       blockLoc = block.location;
@@ -306,6 +312,29 @@ export class CodexBot {
     await this.codexGame.taskStack.sleep(distance * 200);
 
     return distance;
+  }
+
+  dropItem(name: string): boolean {
+    let inventory = this.codexGame.getInventory(this.simBot);
+    let slotItem: ItemStack | null = null;
+
+    if (!inventory) return false;
+
+    let haveItems = false;
+    for (let i = 0; i < inventory.size; i++) {
+      slotItem = inventory.getItem(i);
+      if (slotItem != undefined) {
+        let itemName = slotItem.id.substring(slotItem.id.indexOf(":"), slotItem.id.length);
+        let numItems = slotItem.amount;
+        haveItems = true;
+        i = inventory.size;
+      }
+    }
+    if (haveItems && slotItem) {
+      this.simBot.useItem(slotItem);
+    }
+
+    return false;
   }
 
   // the API always works on the first block in the array

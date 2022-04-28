@@ -400,21 +400,94 @@ export default class Crafting {
     },
     {
       description: {
-        identifier: "minecraft:diamond_sword",
+        identifier: "minecraft:wooden_sword",
       },
 
       tags: ["crafting_table"],
       pattern: ["X", "X", "#"],
       key: {
         "#": {
-          item: "minecraft:stick",
+          item: "minecraft:planks",
+          data: 0,
         },
         X: {
-          item: "minecraft:diamond",
+          item: "minecraft:stick",
+          data: 0,
         },
       },
       result: {
-        item: "minecraft:diamond_sword",
+        item: "minecraft:wooden_sword",
+      },
+    },
+    {
+      description: {
+        identifier: "minecraft:chest",
+      },
+      tags: [""],
+      pattern: ["###", "# #", "###"],
+      key: {
+        "#": {
+          item: "minecraft:planks",
+          data: 0,
+        },
+      },
+      result: {
+        item: "minecraft:chest",
+        data: 0,
+        count: 1,
+      },
+    },
+    {
+      description: {
+        identifier: "minecraft:crafting_table",
+      },
+      tags: [""],
+      pattern: ["", "##", "##"],
+      key: {
+        "#": {
+          item: "minecraft:planks",
+          data: 0,
+        },
+      },
+      result: {
+        item: "minecraft:crafting_table",
+        count: 1,
+      },
+    },
+    {
+      description: {
+        identifier: "minecraft:stick",
+      },
+      tags: [""],
+      pattern: ["", "", "##"],
+      key: {
+        "#": {
+          item: "minecraft:planks",
+          data: 0,
+        },
+      },
+      result: {
+        item: "minecraft:stick",
+        data: 0,
+        count: 4,
+      },
+    },
+    {
+      description: {
+        identifier: "minecraft:furnace",
+      },
+      tags: [""],
+      pattern: ["###", "# #", "###"],
+      key: {
+        "#": {
+          item: "minecraft:cobblestone",
+          data: 0,
+        },
+      },
+      result: {
+        item: "minecraft:furnace",
+        data: 0,
+        count: 1,
       },
     },
   ];
