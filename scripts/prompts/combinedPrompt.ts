@@ -16,6 +16,7 @@ export let context: Context = {
 // folllowEntity(entity: Entity, speed? : number): Promise<void> - Orders the simulated player to move to the given entity.
 // mineBlock(blockArr : Block []) : boolean - simulated player mines a block and places it in their inventory
 // collectNearbyItems() : number - Collects nearby items that may be on the ground - for example, mined ore
+// dropItem(name: string): boolean - Places an inventory item of the same name on the ground, if the bot has the item
 // interactBlock(blockArr: Block[]) : boolean - have the simulated player interact with a block, like a chest, table, forge, etc
 // sortClosestBlock: (blocks: Block[]) : Block[] - sort the block array by which ones are closest to the simulated player
 // transferItem(fromInventory: InventoryComponentContainer,toInventory: InventoryComponentContainer,name: string, numItems: number = -1): boolean
@@ -64,10 +65,6 @@ await setTimeout( ()=> bot.stopMoving(), 1500);
 await setTimeout( ()=> bot.jumpUp(), 1);
 await setTimeout( ()=> bot.jumpUp(), 600);
 await setTimeout( ()=> bot.move(1, 0, 1), 600);
-await setTimeout( ()=> bot.stopMoving(), 1500);
-await setTimeout( ()=> bot.jumpUp(), 1);
-await setTimeout( ()=> bot.jumpUp(), 600);
-await setTimeout( ()=> bot.stopMoving(), 600);
 
 // good work!
 bot.chat("Thanks!");
@@ -104,19 +101,7 @@ let loc = bot.getLocation();
 bot.chat("I am at " + loc.x + ", " + loc.y + ", " + loc.z)
 
 // list items in inventory
-let inventory = game.listInventory(bot);
-let haveItems = false;
-for (let i = 0; i < inventory.size; i++) {
-  let slotItem = inventory.getItem(i);
-  if (slotItem != undefined) {
-    let itemName = slotItem.id.substring(slotItem.id.indexOf(":") + 1, slotItem.id.length);
-    let numItems = slotItem.amount;
-    haveItems = true;
-
-    bot.chat("I have " + numItems + " " + itemName);
-  }
-}
-if(!haveItems) bot.chat("My inventory is empty");
+let inventory = game.listInventory(bot, "bot");
 
 //craft an oak_plank
 bot.craftItem("oak_plank");
@@ -155,6 +140,7 @@ state.grassBlocks = bot.findBlock("grass", 16, 2);
 await bot.navigateLocation(state.grassBlocks);
 state.grassBlocks = bot.sortClosestBlock(state.grassBlocks);, 
 await bot.mineBlock(state.grassBlocks);
+await.bot.mineBlock(state.grassBlocks);
 await bot.collectNearbyItems();
 
 //find and open a chest
@@ -163,18 +149,15 @@ await bot.navigateLocation(state.chest);
 bot.interactBlock(state.chest);
 
 // tell me what is in the chest
-let inventory = game.listInventory(state.chest[0]);
-let haveItems = false;
-for (let i = 0; i < inventory.size; i++) {
-  let slotItem = inventory.getItem(i);
-  if (slotItem != undefined) {
-    let itemName = slotItem.id.substring(slotItem.id.indexOf(":"), slotItem.id.length);
-    let numItems = slotItem.amount;
-    haveItems = true;
+let inventory = game.listInventory(state.chest[0], "chest");
 
-    bot.chat("The chest has " + numItems + " " + itemName);
-  }
-}
-if(!haveItems) bot.chat("The chest is empty");
+
+// bring the logs here and put on the ground
+let loc = bot.getLocation();
+bot.navigateLocation(new Location(loc.x, loc.y, loc.z));
+bot.dropItem("log");
+
+//what items are needed for building a chest, use data from website minecraft.fandom.com/wiki/Recipe_book
+bot.chat("Building a chest requires 8 planks");
 `,
 };

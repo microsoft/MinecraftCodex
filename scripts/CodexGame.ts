@@ -64,20 +64,62 @@ export default class CodexGame {
     });
   }
 
-  listInventory(object: Block | SimulatedPlayer | Player): InventoryComponentContainer | undefined {
+  // Update cycle for the behavior pack, process the taskStack which holds Promise chains
+  processTick() {
+    this.taskStack.processTick();
+  }
+
+  getInventory(object: Block | SimulatedPlayer | Player): InventoryComponentContainer | undefined {
+    let container: InventoryComponentContainer | undefined = undefined;
+
     if (object instanceof SimulatedPlayer) {
-      return (object.getComponent("inventory") as EntityInventoryComponent).container;
+      container = (object.getComponent("inventory") as EntityInventoryComponent).container;
     }
 
     if (object instanceof Block) {
-      return object.getComponent("inventory").container;
+      container = object.getComponent("inventory").container;
     }
 
     if (object instanceof Player) {
-      return (object.getComponent("inventory") as EntityInventoryComponent).container;
+      container = (object.getComponent("inventory") as EntityInventoryComponent).container;
     }
 
-    return undefined;
+    return container;
+  }
+
+  listInventory(object: Block | SimulatedPlayer | Player, name: string): InventoryComponentContainer | undefined {
+    let container = this.getInventory(object);
+
+    if (!container) return undefined;
+
+    let haveItems = false;
+    for (let i = 0; i < container.size; i++) {
+      let slotItem = container.getItem(i);
+      if (slotItem != undefined) {
+        let itemName = slotItem.id.substring(slotItem.id.indexOf(":") + 1, slotItem.id.length);
+        let numItems = slotItem.amount;
+        haveItems = true;
+
+        // special case for bot inventory to be in first person
+        if (name == "bot") {
+          let response = "";
+          response = "I have " + numItems + " " + itemName;
+          if (numItems > 1) response = response + "s";
+          this.bot.chat(response);
+        }
+        // other inventories, like chests are second person
+        else if (name != "") {
+          let response = "The " + name + " has " + numItems + " " + itemName;
+          if (numItems > 1) {
+            response = response + "s";
+          }
+          this.bot.chat(response);
+        }
+      }
+    }
+    if (name != "" && !haveItems) this.bot.chat("The " + name + " is empty");
+
+    return container;
   }
 
   transferItem(
@@ -112,11 +154,6 @@ export default class CodexGame {
     if (toSlot != -1 && fromSlot != -1) return fromInventory.transferItem(fromSlot, toSlot, toInventory);
 
     return false;
-  }
-
-  // Update cycle for the codex pack
-  processTick() {
-    this.taskStack.processTick();
   }
 
   convertBlockLocToLoc(blockLoc: BlockLocation): Location {
