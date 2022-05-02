@@ -100,24 +100,34 @@ export default class CodexGame {
         let numItems = slotItem.amount;
         haveItems = true;
 
-        // special case for bot inventory to be in first person
-        if (name == "bot") {
-          let response = "";
-          response = "I have " + numItems + " " + itemName;
-          if (numItems > 1) response = response + "s";
-          this.bot.chat(response);
-        }
-        // other inventories, like chests are second person
-        else if (name != "") {
-          let response = "The " + name + " has " + numItems + " " + itemName;
-          if (numItems > 1) {
-            response = response + "s";
+        if (itemName != "") {
+          // special case for bot inventory to be in first person
+          if (name == "bot") {
+            let response = "";
+            response = "I have " + numItems + " " + itemName;
+            if (numItems > 1 && !response.endsWith("s")) {
+              response = response + "s";
+            }
+            this.bot.chat(response);
+            this.prompt.addText(response);
           }
-          this.bot.chat(response);
+          // other inventories, like chests are second person
+          else if (name != "") {
+            let response = "The " + name + " has " + numItems + " " + itemName;
+            if (numItems > 1) {
+              response = response + "s";
+            }
+            this.bot.chat(response);
+            this.prompt.addText(response);
+          }
         }
       }
     }
-    if (name != "" && !haveItems) this.bot.chat("The " + name + " is empty");
+    if (name != "" && !haveItems) {
+      let response = "The " + name + " is empty";
+      this.bot.chat(response);
+      this.prompt.addText(response);
+    }
 
     return container;
   }

@@ -29,16 +29,9 @@ bot.moveRelative(1, 0, 1);
 // Stop!
 bot.stopMoving();
 
-// What's up?
-bot.chat("Not much! Just exploring the world.");
-
 // Move backwards for half a second
 bot.moveRelative(0, -1, 1);
 await setTimeout(() => bot.stopMoving(), 500);
-
-// A little more
-bot.moveRelative(0, -1, 1);
-setTimeout(() => bot.stopMoving(), 1000);
 
 // Now right, but further
 bot.moveRelative(-1, 0, 1);
@@ -53,21 +46,11 @@ bot.stopMoving();
 // collect nearby items 
 await bot.collectNearbyItems();
 
-//move diagonally left for three seconds
-bot.moveRelative(-1, 1, 1)
-setTimeout(() => { bot.stopMoving(); }, 3000);
-
-//dance a jig
-await setTimeout( ()=> bot.jumpUp(), 600);
-await setTimeout( ()=> bot.jumpUp(), 600);
-await setTimeout( ()=> bot.move(-1, 0, 1), 600);
-await setTimeout( ()=> bot.stopMoving(), 1500);
-await setTimeout( ()=> bot.jumpUp(), 1);
-await setTimeout( ()=> bot.jumpUp(), 600);
-await setTimeout( ()=> bot.move(1, 0, 1), 600);
-
 // good work!
 bot.chat("Thanks!");
+
+// What's up?
+bot.chat("Not much! Just exploring the world.");
 
 // Look at me
 bot.lookAtEntity(target);
@@ -80,15 +63,6 @@ clearInterval(state.lookingInterval);
 
 // Come to me
 bot.navigateLocation(target.location, 0.7)
-
-// look hither
-bot.lookAtEntity(target);
-
-// keep at it
-state.lookingInterval = setInterval(() => bot.lookAtEntity(target), 50);
-
-// u can stop
-clearInterval(state.lookingInterval);
 
 // follow me
 state.followingInterval = setInterval(() => bot.followEntity(target, 0.7), 2000);
@@ -103,61 +77,113 @@ bot.chat("I am at " + loc.x + ", " + loc.y + ", " + loc.z)
 // list items in inventory
 let inventory = game.listInventory(bot, "bot");
 
+{
+  itemToCraft: "furnace",
+  ingredients: {
+  "cobblestone": {
+      quantity: 8
+    },
+  },
+  result: {
+    numberCreated: 1,
+  },
+},
+{
+  itemToCraft: "planks",
+  ingredients: {
+  "log": {
+      quantity: 1
+    },
+  },
+  result: {
+    numberCreated: 4,
+  },
+},
+{
+  itemToCraft: "chest",
+  ingredients: {
+  "planks": {
+      quantity: 8
+    },
+  },
+  result: {
+    numberCreated: 1,
+  },
+},
+{
+  itemToCraft: "stick",
+  ingredients: {
+  "log": {
+      quantity: 1
+    },
+  },
+  result: {
+    numberCreated: 4,
+  },
+},
+
 //craft an oak_plank
-bot.craftItem("oak_plank");
+bot.craftItem("plank");
 
 // can you craft an oak_plank
-bot.canCraftItem("oak_plank");
-
-// check to see if you can craft an oak_plank, and then build it
-if(bot.canCraftItem("oak_plank")){
-  bot.craftItem("oak_plank");
-}
-else 
-{
-  //find items for an oak plank and craft them
-}
+bot.canCraftItem("plank");
 
 //find some grass
-state.grassBlocks = bot.findBlock("grass", 16, 10);
+state.grassBlocks = bot.findBlock("grass", 16, 100);
 await bot.navigateLocation(state.grassBlocks);
-state.grassBlocks = bot.sortClosestBlock(state.grassBlocks);
 bot.chat("What should I do with the grass?")
 
 //mine two grass
-state.grassBlocks = bot.findBlock("grass", 16, 2);
-if(state.grassBlocks[0] != undefined)
-{
-  await bot.navigateLocation(state.grassBlocks);
-  state.grassBlocks = bot.sortClosestBlock(state.grassBlocks);
-  await bot.mineBlock(state.grassBlocks);
-  await bot.mineBlock(state.grassBlocks);
-  await bot.collectNearbyItems();
-}
+await bot.mineBlock(state.grassBlocks);
+await bot.mineBlock(state.grassBlocks);
+await bot.collectNearbyItems();
 
-//get me grass
+// look hither
+bot.lookAtEntity(target);
+
+// keep at it
+state.lookingInterval = setInterval(() => bot.lookAtEntity(target), 50);
+
+// u can stop
+clearInterval(state.lookingInterval);
+
+//go get me grass
 state.grassBlocks = bot.findBlock("grass", 16, 2);
 await bot.navigateLocation(state.grassBlocks);
-state.grassBlocks = bot.sortClosestBlock(state.grassBlocks);, 
 await bot.mineBlock(state.grassBlocks);
 await.bot.mineBlock(state.grassBlocks);
 await bot.collectNearbyItems();
+bot.chat("I have mined and collected 2 grass");
+
+//get me the ingredients needed to build a chest
+state.log = bot.findBlock("log", 16, 2);
+await bot.mineBlock(state.log);
+await bot.mineBlock(state.log);
+await bot.collectNearbyItems();
+bot.craftItem("planks");
+bot.craftItem("planks");
+
+// make me the sword
+bot.craftItem("planks");
+bot.craftItem("stick");
+bot.craftItem("wooden_sword");
 
 //find and open a chest
 state.chest = bot.findBlock("chest", 16, 1);
 await bot.navigateLocation(state.chest);
-bot.interactBlock(state.chest);
+if(bot.interactBlock(state.chest)) bot.chat("I have opened the chest")
 
 // tell me what is in the chest
 let inventory = game.listInventory(state.chest[0], "chest");
-
+bot.chat("That is all for the inventory);
 
 // bring the logs here and put on the ground
-let loc = bot.getLocation();
-bot.navigateLocation(new Location(loc.x, loc.y, loc.z));
-bot.dropItem("log");
+let loc = target.getLocation();
+bot.navigateLocation(new Location(loc.x+2.5, loc.y, loc.z+2.5));
+if(bot.dropItem("log")) bot.chat("I have brought you the logs");
 
-//what items are needed for building a chest, use data from website minecraft.fandom.com/wiki/Recipe_book
-bot.chat("Building a chest requires 8 planks");
+
+//what items are needed to build planks?
+bot.chat("We need 1 log to build 4 planks);
 `,
 };
