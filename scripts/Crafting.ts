@@ -125,7 +125,7 @@ export default class Crafting {
   static recipes: IRecipe[] = [
     {
       description: {
-        identifier: "minecraft:oak_plank",
+        identifier: "minecraft:planks",
       },
       tags: [""],
       pattern: ["#"],
@@ -486,6 +486,46 @@ export default class Crafting {
       },
       result: {
         item: "minecraft:furnace",
+        data: 0,
+        count: 1,
+      },
+    },
+    {
+      description: {
+        identifier: "minecraft:stick",
+      },
+      tags: [""],
+      pattern: ["###", "# #", "###"],
+      key: {
+        "#": {
+          item: "minecraft:log",
+          data: 0,
+        },
+      },
+      result: {
+        item: "minecraft:stick",
+        data: 0,
+        count: 1,
+      },
+    },
+    {
+      description: {
+        identifier: "minecraft:torch",
+      },
+      tags: [""],
+      pattern: ["", " X ", " #"],
+      key: {
+        X: {
+          item: "minecraft:coal",
+          data: 0,
+        },
+        "#": {
+          item: "minecraft:stick",
+          data: 0,
+        },
+      },
+      result: {
+        item: "minecraft:torch",
         data: 0,
         count: 1,
       },

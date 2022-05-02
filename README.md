@@ -7,6 +7,7 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 - Minecraft Launcher and Minecraft Bedrock Edition (Minecraft Windows)
 - Internal build of Minecraft (allows `eval()` to work). Talk to slatta if you lack access.
 - LTS version of [Node.JS](https://nodejs.org/en/)
+- OPTIONAL: Clear chat texture pack to make it easier to see the bot actions without the dim screen of chat. Download from here and follow install directions: https://mcpedl.com/clear-chat-tranparent-chat/
 
 ## Setup
 

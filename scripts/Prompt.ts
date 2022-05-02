@@ -37,6 +37,10 @@ export default class Prompt {
     this.createDialog();
   }
 
+  addText(textResponse: string) {
+    this.interactions.push(textResponse);
+  }
+
   /**
    * Removes the last interaction from the dialog
    */

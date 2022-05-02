@@ -96,11 +96,12 @@ export class CodexBot {
       speed = 1;
     }
     let dest: Location = new Location(0, 0, 0);
+    let blockArr: Block[] | undefined = undefined;
 
     if (worldLocation instanceof Location) dest = worldLocation;
     else {
       {
-        let blockArr = worldLocation as Block[];
+        blockArr = worldLocation as Block[];
         if (blockArr.length == 0) {
           this.chat("There is nowhere to go");
           return;
@@ -127,7 +128,14 @@ export class CodexBot {
     }
     let lastBlockLoc = new BlockLocation(dest.x, dest.y, dest.z);
     let lastLoc = this.codexGame.gameTest.relativeBlockLocation(lastBlockLoc);
-    locations.push(new Location(lastLoc.x - 0.5, lastLoc.y, lastLoc.z - 0.5));
+
+    let endOffset = new Location(0.5, 0, 0.5);
+    /* if (worldLocation instanceof Location) {
+      endOffset.x += 0.5;
+      endOffset.y += 0.5;
+    }*/
+
+    locations.push(new Location(lastLoc.x - endOffset.x, lastLoc.y, lastLoc.z - endOffset.z));
 
     // this.chat("Navigating to block " + numPts + " blocks long.");
     try {
@@ -141,6 +149,8 @@ export class CodexBot {
     do {
       await this.codexGame.taskStack.sleep(locations.length * 200 * (1 + (1 - speed)));
     } while (Math.abs(botLoc.x - lastLoc.x) <= 1 && Math.abs(botLoc.y - lastLoc.y) <= 1);
+
+    if (blockArr != undefined) this.sortClosestBlock(worldLocation as Block[]);
 
     //  this.chat("Done navigating!");
   }
@@ -165,10 +175,6 @@ export class CodexBot {
       return blocks;
     }
 
-    // we get better results if we have a larger pool of items to sort when we get close to the endpoint
-    // so we always get at least 10, but some types are more limited, so do this on a per type basis
-    if (type === "log") if (numFind < 10) numFind = 10;
-
     let codexBlockType = BlockConverter.ConvertBlockType(type);
     let coreBlockType = "minecraft:" + codexBlockType.name;
 
@@ -180,18 +186,19 @@ export class CodexBot {
             ? this.mirrorOdd(x, y, d - x - y, start, blocks, coreBlockType)
             : this.mirrorEven(x, y, d - x - y, start, blocks, coreBlockType);
 
-          if (blocks.length >= 10) {
+          /* if (blocks.length >= 10) {
             return blocks;
-          }
+          }*/
         }
       }
     }
 
     if (blocks.length <= 0) this.chat("I didn't find any blocks of type " + type);
-    else this.chat(`Found ${blocks.length} ${type} blocks`);
+    //  else this.chat(`Found ${blocks.length} ${type} blocks`);
 
     return blocks;
   }
+
   mirrorEven(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
     for (var i = 1; i >= 0; --i, x *= -1) {
       for (var j = 1; j >= 0; --j, y *= -1) {
@@ -215,6 +222,7 @@ export class CodexBot {
     const loc = new BlockLocation(start.x + x, start.y + y, start.z + z);
     const block = game!.overWorld.getBlock(loc);
 
+    // adding this check sped up the search by factor of 10
     if (block.isEmpty) return;
 
     if (block.type.id === coreBlockType) {
@@ -227,20 +235,24 @@ export class CodexBot {
     let botLoc = this.simBot.location;
 
     if (blockArr === undefined || blockArr.length === 0) {
-      this.chat("There is nothing to mine");
+      let output = "There is nothing here to mine";
+      this.chat(output);
+      game?.prompt.addText(output);
       return false;
     }
 
     let block = blockArr[0];
     let blockLoc = block.location;
 
-    this.chat("Trying to mine!");
+    //  this.chat("Trying to mine!");
 
     // if the block is too high, find one that isn't
     while (blockLoc.y > botHeadLoc.y + 1) {
       //this.chat("The block is too high, I can't reach it");
       blockArr.shift();
       block = blockArr[0];
+      if (block === undefined) return false;
+
       blockLoc = block.location;
     }
 
@@ -292,6 +304,11 @@ export class CodexBot {
       locsToVisit.push(this.codexGame.gameTest.relativeLocation(itemEntity.location));
     }
 
+    let chatOut = "I am picking up " + locsToVisit.length + " block";
+
+    if (locsToVisit.length > 1) chatOut += "s";
+    this.chat(chatOut);
+
     if (locsToVisit.length === 0) {
       this.chat(
         "I couldn't find any items near " +
@@ -309,7 +326,7 @@ export class CodexBot {
 
     let distance = this.getRouteLength(locsToVisit);
 
-    await this.codexGame.taskStack.sleep(distance * 200);
+    await this.codexGame.taskStack.sleep(distance * 1000);
 
     return distance;
   }
@@ -324,7 +341,7 @@ export class CodexBot {
     for (let i = 0; i < inventory.size; i++) {
       slotItem = inventory.getItem(i);
       if (slotItem != undefined) {
-        let itemName = slotItem.id.substring(slotItem.id.indexOf(":"), slotItem.id.length);
+        let itemName = slotItem.id.substring(slotItem.id.indexOf(":") + 1, slotItem.id.length);
         let numItems = slotItem.amount;
         haveItems = true;
         i = inventory.size;
@@ -367,6 +384,7 @@ export class CodexBot {
   craftItem(name: string) {
     let output = Crafting.craft(this.simBot, name);
     this.chat(output);
+    game?.prompt.addText("output");
   }
 
   canCraftItem(name: string) {
