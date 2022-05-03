@@ -22,14 +22,42 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
    ```
 1. Place your OpenAPI API key between the quotes, and save the file.
 
+## Install Minecraft Bedrock Edition Dedicated Server
+
+1. Download and unzip the Minecraft Bedrock Dedicated Server to a location on your hard drive.
+1. Open `gulpfile.js` and update the `dedicatedServerPath` variable to the folder where your dedicated server is located.
+1. Run `gulp updateconfig` to add additional configuration files that enable this module to make net requests on Dedicated Server.
+1. Run `gulp updateserver` to update server configuration properties (`server.properties`)
+1. Run `gulp updateworld` to reset the Minecraft Dedicated Server to the default world for the Codex World.
+1. Run Bedrock Dedicated Server directly by running `bedrock_server` within your Bedrock Server directory.
+
+    The first time you run Bedrock Dedicated Server, you may see a prompt within Windows to enable ports on your firewall for public and/or private networks.
+    Within the pop up Firewall prompt in Windows that you may receive, you will want to potentially enable Bedrock Server port access on your Private networks.
+    Alternately, ensure at least ports 19132 and 19133 are open to Bedrock Dedicated Server via your Firewall tools.
+
+1. Ensure that local Minecraft local clients can connect to your locally-hosted server - to do this, you need to enable 'loopback' connections for Minecraft UWP.
+
+    To enable loopback for Minecraft on Windows, run:
+
+    ```dotnetcli
+    npm run enablemcloopback
+    ```
+
+    To enable loopback for Minecraft Preview on Windows, run:
+
+    ```dotnetcli
+    npm run enablemcpreviewloopback
+    ```
+
 ## Building and Deploying
 
-1. To build and deploy the application run `gulp`. To have it continuously re-build as you make changes, run `gulp watch`.
-1. The deployment step automatically moves the compiled code to a Minecraft BehaviorPack folder.
-1. Open Minecraft (Bedrock Edition) and select "Create New", then "Create New World".
-1. Before starting the world, select "Behvior Packs", and select the CodexWorld behavior pack.
-1. Next, configure the world to use Creative Mode, use the toggles to enable GameTest Framework and Activate Cheats.
-1. Click create and start your world.
+1. To build and deploy the application run `gulp`. To have it continuously re-build as you make changes, run `gulp serve`.
+1. The deployment step automatically moves the compiled code to a Minecraft Behavior Pack folder within your Dedicated Server.
+1. Open Minecraft (Bedrock Edition) and click Play. Select "Servers".
+    The first time you play, you will need to add a server:
+1. Select Add Server
+1. Type a name for the server ("local") and use a Server Address of 127.0.0.1 if you are running Dedicated Server on the same machine.
+1. Select the server, and select Join Server.
 1. Open the chat (click 't') and type "/gametest run codex:codex" to spawn the Non-Player Character, along with a test structure from the BehaviorPack. When loading your world in the future, you can push the button on the command block that appears in the test structure
 
 ## Interacting with the NPC
@@ -53,22 +81,7 @@ NPC: bot.chat("Because they're so versatile!")
 Use the following steps to debug:
 
 1. Run the VSCode build task, it enables the local port to be used for debugging.
-1. Make sure you have the Minecraft Bedrock Edition Debugger installer, or this won't work properly
-1. Run the debugger first, and it will wait for an incoming connection from Minecraft
-1. Run Minecraft and either create your world for the first time, or enter the world you already created
-1. Once in the world, type t which should bring up the command window, and enter:
-
-   `/script debugger connect localhost 19144`
-
-1. You should see a message saying "Connected to debugger"
-1. To run specific script tests, that were registered in your code, type:
-
-   `/gametest run [class]:[testname]`
-
-1. **NOTE**: Your class name and testname come from come from the first two arguments of `GameTest.register()` in `main.ts`
-
-1. In order to set breakpoints, use the generated Javascript files in `build\behavior_packs\codexworld\scripts`
-1. **NOTE**: Close the JS files open in your IDE, and delete old breakpoints and re-set them in the new generated JS files after a build. Each build deletes the old files and replaces with new. Breakpoints won't fire properly if you do not do this
+1. Make sure you have the Minecraft Bedrock Edition Debugger installed within Visual Studio Code, or this won't work properly
 
 ## How it Works - Prompt Engineering
 
