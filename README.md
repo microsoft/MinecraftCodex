@@ -4,8 +4,7 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 
 ## Requirements
 
-- Minecraft Launcher and Minecraft Bedrock Edition (Minecraft Windows)
-- Internal build of Minecraft (allows `eval()` to work). Talk to slatta if you lack access.
+- Minecraft Launcher and Minecraft Bedrock Edition v1.19 (Minecraft Windows)
 - LTS version of [Node.JS](https://nodejs.org/en/)
 - OPTIONAL: Clear chat texture pack to make it easier to see the bot actions without the dim screen of chat. Download from here and follow install directions: https://mcpedl.com/clear-chat-tranparent-chat/
 
@@ -31,30 +30,30 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 1. Run `gulp updateworld` to reset the Minecraft Dedicated Server to the default world for the Codex World.
 1. Run Bedrock Dedicated Server directly by running `bedrock_server` within your Bedrock Server directory.
 
-    The first time you run Bedrock Dedicated Server, you may see a prompt within Windows to enable ports on your firewall for public and/or private networks.
-    Within the pop up Firewall prompt in Windows that you may receive, you will want to potentially enable Bedrock Server port access on your Private networks.
-    Alternately, ensure at least ports 19132 and 19133 are open to Bedrock Dedicated Server via your Firewall tools.
+   The first time you run Bedrock Dedicated Server, you may see a prompt within Windows to enable ports on your firewall for public and/or private networks.
+   Within the pop up Firewall prompt in Windows that you may receive, you will want to potentially enable Bedrock Server port access on your Private networks.
+   Alternately, ensure at least ports 19132 and 19133 are open to Bedrock Dedicated Server via your Firewall tools.
 
 1. Ensure that local Minecraft local clients can connect to your locally-hosted server - to do this, you need to enable 'loopback' connections for Minecraft UWP.
 
-    To enable loopback for Minecraft on Windows, run:
+   To enable loopback for Minecraft on Windows, run:
 
-    ```dotnetcli
-    npm run enablemcloopback
-    ```
+   ```dotnetcli
+   npm run enablemcloopback
+   ```
 
-    To enable loopback for Minecraft Preview on Windows, run:
+   To enable loopback for Minecraft Preview on Windows, run:
 
-    ```dotnetcli
-    npm run enablemcpreviewloopback
-    ```
+   ```dotnetcli
+   npm run enablemcpreviewloopback
+   ```
 
 ## Building and Deploying
 
 1. To build and deploy the application run `gulp`. To have it continuously re-build as you make changes, run `gulp serve`.
 1. The deployment step automatically moves the compiled code to a Minecraft Behavior Pack folder within your Dedicated Server.
 1. Open Minecraft (Bedrock Edition) and click Play. Select "Servers".
-    The first time you play, you will need to add a server:
+   The first time you play, you will need to add a server:
 1. Select Add Server
 1. Type a name for the server ("local") and use a Server Address of 127.0.0.1 if you are running Dedicated Server on the same machine.
 1. Select the server, and select Join Server.
