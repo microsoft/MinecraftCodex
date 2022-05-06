@@ -124,7 +124,9 @@ export default class CodexGame {
       }
     }
     if (name != "" && !haveItems) {
-      let response = "The " + name + " is empty";
+      let response = "";
+      if (name === "bot") response = "I have no items";
+      else response = "The " + name + " is empty";
       this.bot.chat(response);
       this.prompt.addText(response);
     }
@@ -142,6 +144,7 @@ export default class CodexGame {
     let slotItem: ItemStack;
     let fromSlot = -1;
     let toSlot = -1;
+    itemName = "minecraft:" + itemName;
 
     for (let i = 0; i < fromInventory.size; i++) {
       slotItem = fromInventory.getItem(i);
@@ -161,8 +164,11 @@ export default class CodexGame {
       }
     }
 
-    if (toSlot != -1 && fromSlot != -1) return fromInventory.transferItem(fromSlot, toSlot, toInventory);
-
+    if (toSlot != -1 && fromSlot != -1) {
+      let result = fromInventory.transferItem(fromSlot, toSlot, toInventory);
+      return result;
+    }
+    this.bot.chat("The item isn't there");
     return false;
   }
 

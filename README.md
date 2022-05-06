@@ -29,6 +29,7 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 1. Open Minecraft (Bedrock Edition) and select "Create New", then "Create New World".
 1. Before starting the world, select "Behvior Packs", and select the CodexWorld behavior pack.
 1. Next, configure the world to use Creative Mode, use the toggles to enable GameTest Framework and Activate Cheats.
+1. NOTE: If you would like to use the same world as the Build demo, the seed for the world is: 3983439165226643778
 1. Click create and start your world.
 1. Open the chat (click 't') and type "/gametest run codex:codex" to spawn the Non-Player Character, along with a test structure from the BehaviorPack. When loading your world in the future, you can push the button on the command block that appears in the test structure
 
