@@ -58,6 +58,7 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 1. Select Add Server
 1. Type a name for the server ("local") and use a Server Address of 127.0.0.1 if you are running Dedicated Server on the same machine.
 1. Select the server, and select Join Server.
+
 1. Open the chat (click 't') and type "/gametest run codex:codex" to spawn the Non-Player Character, along with a test structure from the BehaviorPack. When loading your world in the future, you can push the button on the command block that appears in the test structure
 
 ## Interacting with the NPC

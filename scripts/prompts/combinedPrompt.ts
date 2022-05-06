@@ -16,12 +16,13 @@ export let context: Context = {
 // folllowEntity(entity: Entity, speed? : number): Promise<void> - Orders the simulated player to move to the given entity.
 // mineBlock(blockArr : Block []) : boolean - simulated player mines a block and places it in their inventory
 // collectNearbyItems() : number - Collects nearby items that may be on the ground - for example, mined ore
-// dropItem(name: string): boolean - Places an inventory item of the same name on the ground, if the bot has the item
+// placeItem(name: string): boolean - Places an inventory item of the same name on the ground, if the bot has the item
 // interactBlock(blockArr: Block[]) : boolean - have the simulated player interact with a block, like a chest, table, forge, etc
 // sortClosestBlock: (blocks: Block[]) : Block[] - sort the block array by which ones are closest to the simulated player
 // transferItem(fromInventory: InventoryComponentContainer,toInventory: InventoryComponentContainer,name: string, numItems: number = -1): boolean
 // canCraftItem(name: string) : boolean - does the simulated player have the inventory items to craft the requested item?
 // craftItem(name: string) : void - craft the requested item from the simulated player's inventory
+// equipItem(name: string) : boolean - equip the named item in the bot's hand from it's inventory
 // state is an object where the simulated player should store its state.`,
   dialog: `// Move left
 bot.moveRelative(1, 0, 1);
@@ -74,7 +75,7 @@ clearInterval(state.followingInterval);
 let loc = bot.getLocation();
 bot.chat("I am at " + loc.x + ", " + loc.y + ", " + loc.z)
 
-// list items in inventory
+// list items in your inventory
 let inventory = game.listInventory(bot, "bot");
 
 {
@@ -175,10 +176,9 @@ if(bot.interactBlock(state.chest)) bot.chat("I have opened the chest")
 
 // tell me what is in the chest
 let inventory = game.listInventory(state.chest[0], "chest");
-bot.chat("That is all for the inventory);
 
 // bring the logs here and put on the ground
-let loc = target.getLocation();
+let loc = target.location;
 bot.navigateLocation(new Location(loc.x+2.5, loc.y, loc.z+2.5));
 if(bot.dropItem("log")) bot.chat("I have brought you the logs");
 

@@ -14,6 +14,8 @@ import {
   StringBlockProperty,
   BlockPermutation,
   EntityQueryOptions,
+  EntityInventoryComponent,
+  InventoryComponentContainer,
   BlockRecordPlayerComponent,
   ItemStack,
 } from "mojang-minecraft";
@@ -41,7 +43,18 @@ export interface Bot extends SimulatedPlayer {
   canCraftItem: (name: string) => boolean;
   craftItem: (name: string) => void;
   dropItem: (name: string) => boolean;
+  placeItem: (name: string) => boolean;
   collectNearbyItems: () => Promise<number>;
+  equipItem: (name: string) => boolean;
+  transferItem: (
+    fromInventory: InventoryComponentContainer,
+    toInventory: InventoryComponentContainer,
+    name: string,
+    numItems: number
+  ) => boolean;
+
+  inventory?: InventoryComponentContainer;
+  targetInventory?: InventoryComponentContainer;
 }
 
 export class CodexBot {
@@ -72,10 +85,17 @@ export class CodexBot {
     this.simBot.collectNearbyItems = this.collectNearbyItems.bind(this);
     this.simBot.interactBlock = this.interactBlock.bind(this);
     this.simBot.sortClosestBlock = this.sortClosestBlock.bind(this);
-    this.simBot.dropItem = this.dropItem.bind(this);
 
     this.simBot.canCraftItem = this.canCraftItem.bind(this);
     this.simBot.craftItem = this.craftItem.bind(this);
+    this.simBot.transferItem = this.transferItem.bind(this);
+    this.simBot.dropItem = this.dropItem.bind(this);
+    this.simBot.equipItem = this.equipItem.bind(this);
+    this.simBot.placeItem = this.placeItem.bind(this);
+    this.simBot.inventory = this.simBot.inventory = (
+      this.simBot.getComponent("inventory") as EntityInventoryComponent
+    ).container;
+    this.simBot.targetInventory = (this.players[0].getComponent("inventory") as EntityInventoryComponent).container;
   }
 
   chat(message: string) {
@@ -129,11 +149,7 @@ export class CodexBot {
     let lastBlockLoc = new BlockLocation(dest.x, dest.y, dest.z);
     let lastLoc = this.codexGame.gameTest.relativeBlockLocation(lastBlockLoc);
 
-    let endOffset = new Location(0.5, 0, 0.5);
-    /* if (worldLocation instanceof Location) {
-      endOffset.x += 0.5;
-      endOffset.y += 0.5;
-    }*/
+    let endOffset = new Location(0, 0, 0);
 
     locations.push(new Location(lastLoc.x - endOffset.x, lastLoc.y, lastLoc.z - endOffset.z));
 
@@ -148,11 +164,11 @@ export class CodexBot {
     // we ignore the y position because it made sense when writing this code, could be a wrong choice
     do {
       await this.codexGame.taskStack.sleep(locations.length * 200 * (1 + (1 - speed)));
-    } while (Math.abs(botLoc.x - lastLoc.x) <= 1 && Math.abs(botLoc.y - lastLoc.y) <= 1);
+    } while (this.getBlockDistance(this.codexGame.gameTest.relativeBlockLocation(this.getLocation()), lastLoc) > 2.5);
 
     if (blockArr != undefined) this.sortClosestBlock(worldLocation as Block[]);
 
-    //  this.chat("Done navigating!");
+    this.chat("Done navigating!");
   }
 
   async followEntity(player: Entity, speed: number = 0.7) {
@@ -177,6 +193,8 @@ export class CodexBot {
 
     let codexBlockType = BlockConverter.ConvertBlockType(type);
     let coreBlockType = "minecraft:" + codexBlockType.name;
+
+    // this.chat("The coreBlockType is " + coreBlockType);
 
     var half = Math.ceil(diameter / 2) - 1;
     for (var d = 0; d <= 3 * half; d++) {
@@ -256,11 +274,8 @@ export class CodexBot {
       blockLoc = block.location;
     }
 
-    // don't let the bot try to mine if its not near the block, wait until it has gotten to
-    // it's destination to start mining
-    if (this.getBlockDistance(blockLoc, new BlockLocation(botLoc.x, botLoc.y, botLoc.z)) > 3) {
-      await this.navigateLocation(new Location(blockLoc.x, blockLoc.y, blockLoc.z), 0.7);
-    }
+    // go towards the block we are trying to mine
+    await this.navigateLocation(new Location(blockLoc.x, blockLoc.y, blockLoc.z), 0.7);
 
     // make sure the bot is looking at what it is mining
     this.lookBlock(blockLoc);
@@ -289,6 +304,22 @@ export class CodexBot {
     let relBlockLoc = this.codexGame.gameTest.relativeBlockLocation(blockLoc);
     // make sure the bot is facing the block
     this.simBot.lookAtBlock(relBlockLoc);
+  }
+
+  // the API always works on the first block in the array
+  interactBlock(blockArr: Block[]): boolean {
+    if (blockArr === undefined || blockArr.length === 0) {
+      this.chat("There is nothing to interact with");
+      return false;
+    }
+
+    let blockLoc = blockArr[0].location;
+
+    // make sure the bot is facing the block
+    this.lookBlock(blockLoc);
+
+    let blockLocRel = this.codexGame.gameTest.relativeBlockLocation(blockLoc);
+    return this.simBot.interactWithBlock(blockLocRel);
   }
 
   async collectNearbyItems(): Promise<number> {
@@ -326,7 +357,14 @@ export class CodexBot {
 
     let distance = this.getRouteLength(locsToVisit);
 
-    await this.codexGame.taskStack.sleep(distance * 1000);
+    let lastLoc = locsToVisit[locsToVisit.length - 1];
+    let blockLastLoc = new BlockLocation(lastLoc.x, lastLoc.y, lastLoc.z);
+
+    do {
+      await this.codexGame.taskStack.sleep(locsToVisit.length * 500);
+    } while (
+      this.getBlockDistance(this.codexGame.gameTest.relativeBlockLocation(this.getLocation()), blockLastLoc) > 1.5
+    );
 
     return distance;
   }
@@ -334,40 +372,92 @@ export class CodexBot {
   dropItem(name: string): boolean {
     let inventory = this.codexGame.getInventory(this.simBot);
     let slotItem: ItemStack | null = null;
+    let slotLoc = 0;
 
     if (!inventory) return false;
 
-    let haveItems = false;
+    let fullName = "minecraft:" + name;
+    //  this.chat("The item to drop is " + fullName);
+
     for (let i = 0; i < inventory.size; i++) {
       slotItem = inventory.getItem(i);
       if (slotItem != undefined) {
-        let itemName = slotItem.id.substring(slotItem.id.indexOf(":") + 1, slotItem.id.length);
-        let numItems = slotItem.amount;
-        haveItems = true;
-        i = inventory.size;
+        if (slotItem.id === fullName) {
+          //  this.chat("Found the item to drop!");
+          slotLoc = i;
+          let loc = this.simBot.location;
+          let result = this.simBot.useItemInSlotOnBlock(slotLoc, new BlockLocation(loc.x + 1, loc.y, loc.z + 1));
+          // this.chat("Result is " + result);
+          return result;
+        }
       }
     }
-    if (haveItems && slotItem) {
-      this.simBot.useItem(slotItem);
+    return false;
+  }
+
+  placeItem(name: string): boolean {
+    let inventory = this.codexGame.getInventory(this.simBot);
+    let slotItem: ItemStack | null = null;
+
+    if (!inventory) return false;
+
+    let fullName = "minecraft:" + name;
+    let loc = this.getLocation();
+
+    if (!game) return false;
+
+    let block: Block = game.overWorld.getBlock(loc);
+
+    for (let i = 0; i < inventory.size; i++) {
+      slotItem = inventory.getItem(i);
+      if (slotItem != undefined) {
+        if (slotItem.id === fullName) {
+          // Create the permutation
+          let torch = MinecraftBlockTypes.torch.createDefaultBlockPermutation();
+          // Set the permutation
+          block.setPermutation(torch);
+          return true;
+        }
+      }
     }
 
     return false;
   }
 
-  // the API always works on the first block in the array
-  interactBlock(blockArr: Block[]): boolean {
-    if (blockArr === undefined || blockArr.length === 0) {
-      this.chat("There is nothing to interact with");
-      return false;
+  transferItem(
+    fromInventory: InventoryComponentContainer,
+    toInventory: InventoryComponentContainer,
+    name: string,
+    numItems: number
+  ): boolean {
+    if (!game) return false;
+    return game?.transferItem(fromInventory, toInventory, name, numItems);
+  }
+
+  equipItem(name: string) {
+    let itemName = BlockConverter.ConvertBlockType(name).name;
+    let slotItem: ItemStack;
+    itemName = "minecraft:" + itemName;
+    let inventory = this.simBot.inventory;
+    let slotLoc = 0;
+
+    //  this.chat("Inventory is " + inventory + " And item name is " + itemName);
+
+    if (!inventory) return false;
+
+    for (let i = 0; i < inventory.size; i++) {
+      slotItem = inventory.getItem(i);
+      if (slotItem != undefined) {
+        if (slotItem.id == itemName) {
+          let loc = this.simBot.location;
+          let result = this.simBot.useItemInSlot(i);
+          this.chat("Result is " + result);
+          return result;
+        }
+      }
     }
 
-    let blockLoc = blockArr[0].location;
-
-    // make sure the bot is facing the block
-    this.lookBlock(blockLoc);
-
-    let blockLocRel = this.codexGame.gameTest.relativeBlockLocation(blockLoc);
-    return this.simBot.interactWithBlock(blockLocRel);
+    return false;
   }
 
   sortClosestBlock(blocks: Block[]): Block[] {
@@ -384,7 +474,7 @@ export class CodexBot {
   craftItem(name: string) {
     let output = Crafting.craft(this.simBot, name);
     this.chat(output);
-    game?.prompt.addText("output");
+    game?.prompt.addText(output);
   }
 
   canCraftItem(name: string) {
