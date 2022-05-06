@@ -16,7 +16,7 @@ export let context: Context = {
 // folllowEntity(entity: Entity, speed? : number): Promise<void> - Orders the simulated player to move to the given entity.
 // mineBlock(blockArr : Block []) : boolean - simulated player mines a block and places it in their inventory
 // collectNearbyItems() : number - Collects nearby items that may be on the ground - for example, mined ore
-// dropItem(name: string): boolean - Places an inventory item of the same name on the ground, if the bot has the item
+// placeItem(name: string): boolean - Places an inventory item of the same name on the ground, if the bot has the item
 // interactBlock(blockArr: Block[]) : boolean - have the simulated player interact with a block, like a chest, table, forge, etc
 // sortClosestBlock: (blocks: Block[]) : Block[] - sort the block array by which ones are closest to the simulated player
 // transferItem(fromInventory: InventoryComponentContainer,toInventory: InventoryComponentContainer,name: string, numItems: number = -1): boolean

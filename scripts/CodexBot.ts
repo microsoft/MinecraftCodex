@@ -43,6 +43,7 @@ export interface Bot extends SimulatedPlayer {
   canCraftItem: (name: string) => boolean;
   craftItem: (name: string) => void;
   dropItem: (name: string) => boolean;
+  placeItem: (name: string) => boolean;
   collectNearbyItems: () => Promise<number>;
   equipItem: (name: string) => boolean;
   transferItem: (
@@ -90,6 +91,7 @@ export class CodexBot {
     this.simBot.transferItem = this.transferItem.bind(this);
     this.simBot.dropItem = this.dropItem.bind(this);
     this.simBot.equipItem = this.equipItem.bind(this);
+    this.simBot.placeItem = this.placeItem.bind(this);
     this.simBot.inventory = this.simBot.inventory = (
       this.simBot.getComponent("inventory") as EntityInventoryComponent
     ).container;
@@ -375,30 +377,53 @@ export class CodexBot {
     if (!inventory) return false;
 
     let fullName = "minecraft:" + name;
-    this.chat("The item to drop is " + fullName);
+    //  this.chat("The item to drop is " + fullName);
 
-    let haveItems = false;
     for (let i = 0; i < inventory.size; i++) {
       slotItem = inventory.getItem(i);
       if (slotItem != undefined) {
         if (slotItem.id === fullName) {
-          this.chat("Found the item to drop!");
-          haveItems = true;
+          //  this.chat("Found the item to drop!");
           slotLoc = i;
-          i = inventory.size;
+          let loc = this.simBot.location;
+          let result = this.simBot.useItemInSlotOnBlock(slotLoc, new BlockLocation(loc.x + 1, loc.y, loc.z + 1));
+          // this.chat("Result is " + result);
+          return result;
         }
       }
     }
-    if (haveItems && slotItem) {
-      this.chat("Found a match! " + "item is " + slotItem.id);
-      let loc = this.simBot.location;
-      let result = this.simBot.useItemInSlotOnBlock(slotLoc, new BlockLocation(loc.x + 1, loc.y, loc.z + 1));
-      this.chat("Result is " + result);
-      return result;
+    return false;
+  }
+
+  placeItem(name: string): boolean {
+    let inventory = this.codexGame.getInventory(this.simBot);
+    let slotItem: ItemStack | null = null;
+
+    if (!inventory) return false;
+
+    let fullName = "minecraft:" + name;
+    let loc = this.getLocation();
+
+    if (!game) return false;
+
+    let block: Block = game.overWorld.getBlock(loc);
+
+    for (let i = 0; i < inventory.size; i++) {
+      slotItem = inventory.getItem(i);
+      if (slotItem != undefined) {
+        if (slotItem.id === fullName) {
+          // Create the permutation
+          let torch = MinecraftBlockTypes.torch.createDefaultBlockPermutation();
+          // Set the permutation
+          block.setPermutation(torch);
+          return true;
+        }
+      }
     }
 
     return false;
   }
+
   transferItem(
     fromInventory: InventoryComponentContainer,
     toInventory: InventoryComponentContainer,
