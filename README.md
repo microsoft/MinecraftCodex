@@ -4,7 +4,10 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 
 ## Requirements
 
-- Minecraft Launcher and Minecraft Bedrock Edition v1.19 (Minecraft Windows)
+- Minecraft Launcher and Minecraft Bedrock Edition (Minecraft Windows)
+  - You need to be an owner of Minecraft in order to get the preview edition, PC GamePass, or GamePass Ultimate members already have access to it.
+  - Download the Xbox app from Microsoft Store
+  - Open the Xbox App and search for Minecraft Preview and install it
 - LTS version of [Node.JS](https://nodejs.org/en/)
 - OPTIONAL: Clear chat texture pack to make it easier to see the bot actions without the dim screen of chat. Download from here and follow install directions: https://mcpedl.com/clear-chat-tranparent-chat/
 
