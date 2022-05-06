@@ -1,4 +1,4 @@
-import { http, Request, RequestMethod, Header } from "mojang-net";
+import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "mojang-net";
 import { game } from "./main.js";
 
 // WebCommand Class
@@ -31,13 +31,10 @@ export default class WebCommand {
   }
 
   async getCommand(): Promise<boolean> {
-    const req: any = new Request(
-      [new Header("Content-Type", "text/plain")],
-      "http://localhost:3000",
-      "",
-      300,
-      RequestMethod.GET
-    );
+    const req = new HttpRequest("http://localhost:3000");
+
+    req.headers = [new HttpHeader("Content-Type", "text/plain")];
+    req.method = HttpRequestMethod.GET;
 
     const response = await http.request(req);
 

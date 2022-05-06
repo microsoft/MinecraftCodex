@@ -1,4 +1,4 @@
-import { http, Request, RequestMethod, Header } from "mojang-net";
+import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "mojang-net";
 import { CODEX_API_KEY } from "./vars.js";
 
 // Model Class
@@ -11,20 +11,24 @@ export default class Model {
   }
 
   async getCompletion(prompt: string) {
-    const req: any = new Request(
-      [new Header("Content-Type", "application/json"), new Header("Authorization", ` Bearer ${CODEX_API_KEY}`)],
-      "https://api.openai.com/v1/engines/davinci-codex-002-msft/completions",
-      JSON.stringify({
-        prompt: prompt,
+    const req = new HttpRequest("https://api.openai.com/v1/engines/davinci-codex-002-msft/completions");
 
-        max_tokens: 500,
-        temperature: 0,
-        stop: "//",
-        n: 1,
-      }),
-      300,
-      RequestMethod.POST
-    );
+    req.headers = [
+      new HttpHeader("Content-Type", "application/json"),
+      new HttpHeader("Accept", "application/json"),
+      new HttpHeader("Authorization", `Bearer ${CODEX_API_KEY}`),
+    ];
+
+    req.body = JSON.stringify({
+      prompt: prompt,
+
+      max_tokens: 500,
+      temperature: 0,
+      stop: "//",
+      n: 1,
+    });
+
+    req.method = HttpRequestMethod.POST;
 
     const response: any = await http.request(req);
 
@@ -34,7 +38,9 @@ export default class Model {
       throw new Error(`${response.status} ${response.statusText}`);
     }
 
-    this.completions = (response.body as any).choices.map((choice: any) => choice.text);
+    const resp = JSON.parse(response.body as any);
+
+    this.completions = (resp as any).choices.map((choice: any) => choice.text);
     return this.completions[0];
   }
 }

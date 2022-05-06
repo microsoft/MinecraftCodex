@@ -5,8 +5,9 @@
         "type": "minecraft-js",
         "request": "attach",
         "name": "Wait for Minecraft Debug Connections",
-        "mode": "listen",
-        "localRoot": "${workspaceFolder}/build/behavior_packs/codexworld/",
+       "localRoot": "${workspaceFolder}/scripts",
+        "sourceMapRoot": "${workspaceFolder}/build/behavior_packs/_codexworldDebug",
+        "remoteRoot": "${workspaceFolder}/build/behavior_packs/codexworld",
         "port": 19144
       }
     ]
