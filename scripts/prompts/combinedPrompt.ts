@@ -12,7 +12,7 @@ export let context: Context = {
 // listInventory(object: Block | SimulatedPlayer | Player): InventoryComponentContainer - returns a container enumerating all the items a player or treasure chest has
 // getLocation() : BlockLocation - returns the location from the simulated player
 // navigateLocation(worldLocation: Location : Block, speed?: number) : Promise<NavigationResult> - path find through the world to a location
-// findBlock(type: string, maxRadius: number, numFind : number = 1): Block [] - Returns the an arry of blocks closest to the simulated player of the type given within the radius.
+// findBlock(type: string, maxRadius: number, numFind : number = 1): Promise<Block []> - Returns the an arry of blocks closest to the simulated player of the type given within the radius.
 // folllowEntity(entity: Entity, speed? : number): Promise<void> - Orders the simulated player to move to the given entity.
 // mineBlock(blockArr : Block []) : boolean - simulated player mines a block and places it in their inventory
 // collectNearbyItems() : number - Collects nearby items that may be on the ground - for example, mined ore
@@ -169,7 +169,7 @@ bot.craftItem("stick");
 bot.craftItem("wooden_sword");
 
 //find and open a chest
-state.chest = bot.findBlock("chest", 16, 1);
+state.chest = await bot.findBlock("chest", 16, 1);
 await bot.navigateLocation(state.chest);
 if(bot.interactBlock(state.chest)) bot.chat("I have opened the chest")
 

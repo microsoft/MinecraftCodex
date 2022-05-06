@@ -118,6 +118,9 @@ export class BlockConverter {
           break;
       }
     }
+    if(baseType === "") {
+      baseType = type;
+    }
     return new CodexBlockType(blockConverter, baseType);
   }
 }

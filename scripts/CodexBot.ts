@@ -33,7 +33,7 @@ export interface Bot extends SimulatedPlayer {
   navigateLocation: (worldLocation: Location | Block[], speed?: number) => Promise<void>;
   followEntity: (player: Entity, speed?: number) => Promise<void>;
 
-  findBlock: (type: string, maxRadius: number) => Block[];
+  findBlock: (type: string, maxRadius: number, numFind: number) => Promise<Block[]>;
   mineBlock: (block: Block[]) => Promise<boolean>;
   interactBlock: (block: Block[]) => boolean;
   sortClosestBlock: (blocks: Block[]) => Block[];
@@ -166,7 +166,7 @@ export class CodexBot {
   }
 
   // adapted from https://stackoverflow.com/questions/37214057/3d-array-traversal-originating-from-center
-  findBlock(type: string, maxRadius: number = 16, numFind: number = 1): Block[] {
+  async findBlock(type: string, maxRadius: number = 16, numFind: number = 1): Promise<Block[]> {
     let diameter = maxRadius * 2;
     const start = new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
     let blocks: Block[] = [];
@@ -177,6 +177,8 @@ export class CodexBot {
 
     let codexBlockType = BlockConverter.ConvertBlockType(type);
     let coreBlockType = "minecraft:" + codexBlockType.name;
+    this.chat("Finding " + numFind + " " + type + " blocks");
+    this.chat("Converted " + type + " to " + coreBlockType);
 
     var half = Math.ceil(diameter / 2) - 1;
     for (var d = 0; d <= 3 * half; d++) {
@@ -220,7 +222,7 @@ export class CodexBot {
   }
   checkBlock(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
     const loc = new BlockLocation(start.x + x, start.y + y, start.z + z);
-    const block = game!.overWorld.getBlock(loc);
+    const block = this.simBot.dimension.getBlock(loc);
 
     // adding this check sped up the search by factor of 10
     if (block.isEmpty) return;
