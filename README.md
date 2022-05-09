@@ -28,10 +28,15 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 
 1. Download and unzip the Minecraft Bedrock Dedicated Server to a location on your hard drive.
 1. Open `gulpfile.js` and update the `dedicatedServerPath` variable to the folder where your dedicated server is located.
-1. Run `gulp updateconfig` to add additional configuration files that enable this module to make net requests on Dedicated Server.
-1. Run `gulp updateserver` to update server configuration properties (`server.properties`)
-1. Run `gulp updateworld` to reset the Minecraft Dedicated Server to the default world for the Codex World.
-1. Run Bedrock Dedicated Server directly by running `bedrock_server` within your Bedrock Server directory.
+1. Run these three commands:
+   `gulp updateconfig`
+   `gulp updateserver`
+   `gulp updateworld`
+1. Those commands will:
+   - Add additional configuration files that enable this module to make net requests on Dedicated Server.
+   - Update server configuration properties (`server.properties`)
+   - Reset the Minecraft Dedicated Server to the default world for the Codex World.
+1. You can run Bedrock Dedicated Server directly by running `bedrock_server` within your Bedrock Server directory for testing. For server debugging, you need to use `gulp serve` from your code directory.
 
    The first time you run Bedrock Dedicated Server, you may see a prompt within Windows to enable ports on your firewall for public and/or private networks.
    Within the pop up Firewall prompt in Windows that you may receive, you will want to potentially enable Bedrock Server port access on your Private networks.
@@ -53,7 +58,7 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 
 ## Building and Deploying
 
-1. To build and deploy the application run `gulp`. To have it continuously re-build as you make changes, run `gulp serve`.
+1. To build and deploy the application run `gulp`. To have it continuously re-build as you make changes, run `gulp serve`. This will stop the server and restart it with your latest code regularly. If you just want continuous builds, then run `gulp watch`
 1. The deployment step automatically moves the compiled code to a Minecraft Behavior Pack folder within your Dedicated Server.
 1. Open Minecraft (Bedrock Edition) and click Play. Select "Servers".
    The first time you play, you will need to add a server:
@@ -61,7 +66,15 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 1. Type a name for the server ("local") and use a Server Address of 127.0.0.1 if you are running Dedicated Server on the same machine.
 1. Select the server, and select Join Server.
 
-1. Open the chat (click 't') and type "/gametest run codex:codex" to spawn the Non-Player Character, along with a test structure from the BehaviorPack. When loading your world in the future, you can push the button on the command block that appears in the test structure
+1. Open the chat (click 't') and type `/gametest run codex:codex` to spawn the Non-Player Character, along with a test structure from the BehaviorPack. When loading your world in the future, you can push the button on the command block that appears in the test structure to start the codex code running
+
+## Debugging
+
+Use the following steps to debug:
+
+1. Make sure you have the Minecraft Bedrock Edition Debugger installed within Visual Studio Code, or this won't work properly, make sure it is version 0.2.0 or later
+2. Running `gulp serve` in your code folder will start the server running, and then you can run the debugger which will automatically connect to the server.
+3. You can set breakpoints in the TypeScript files directly.
 
 ## Interacting with the NPC
 
@@ -78,13 +91,6 @@ NPC: bot.chat("Because they're so versatile!")
 ```
 
 **Note**: The NPC isn't perfect, and sometimes the conversation can get stuck or begin repeating itself. Type "reset" to reset the conversational experience.
-
-## Debugging
-
-Use the following steps to debug:
-
-1. Run the VSCode build task, it enables the local port to be used for debugging.
-1. Make sure you have the Minecraft Bedrock Edition Debugger installed within Visual Studio Code, or this won't work properly
 
 ## How it Works - Prompt Engineering
 

@@ -10,27 +10,4 @@
             },
         }
     },
-    "tasks": [
-        {
-            "label": "OpenLoopback",
-            "type": "shell",
-            "command": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-1958404141-86561845-1752920682-3514627264-368642714-62675701-733520436" ,
-            "presentation": {
-                "reveal": "silent",
-                "revealProblems": "onProblem",
-                "close": true
-            }
-        },
-        {
-            "label": "Build",
-            "dependsOn": [
-                "OpenLoopback"
-            ],
-            "problemMatcher": [],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        }
-    ]
 }
