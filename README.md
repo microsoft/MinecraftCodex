@@ -38,10 +38,12 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
    - Reset the Minecraft Dedicated Server to the default world for the Codex World.
 1. You can run Bedrock Dedicated Server directly by running `bedrock_server` within your Bedrock Server directory for testing. For server debugging, you need to use `gulp serve` from your code directory.
 
-   The first time you run Bedrock Dedicated Server, you may see a prompt within Windows to enable ports on your firewall for public and/or private networks.
+1. The first time you run Bedrock Dedicated Server, you may see a prompt within Windows to enable ports on your firewall for public and/or private networks.
    Within the pop up Firewall prompt in Windows that you may receive, you will want to potentially enable Bedrock Server port access on your Private networks.
    Alternately, ensure at least ports 19132 and 19133 are open to Bedrock Dedicated Server via your Firewall tools.
 
+1. Run the dedicated server from it's directory once to get it up and running. After it has completed loading (you will see the message "Debugger Listening" on the console), type in the following command to ensure you have full access to controls in game.
+   `op <your username>`
 1. Ensure that local Minecraft local clients can connect to your locally-hosted server - to do this, you need to enable 'loopback' connections for Minecraft UWP.
 
    To enable loopback for Minecraft on Windows, run:
