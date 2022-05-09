@@ -13,7 +13,7 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 
 ## Setup
 
-1. Clone the repo wherever you like: `git clone https://github.com/microsoft/CodexWorld.git`. The project is setup to work with your local Minecraft install.
+1. Clone the repo wherever you like: `git clone https://github.com/microsoft/MinecraftCodex.git`. The project is setup to work with your local Minecraft install.
 1. Open using VSCode, you will get a recommendations to install Minecraft extensions to enable debugging
 1. Open Terminal in VSCode in the code directory, and run `npm install` to pull down the package dependencies.
 1. Under the scripts folder, create a file vars.ts with the following key value pairs:
