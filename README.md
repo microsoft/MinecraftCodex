@@ -22,28 +22,25 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
     export let DEBUG=true;
     export default CODEX_API_KEY;
    ```
-1. Place your OpenAPI API key between the quotes, and save the file.
+1. Place your OpenAI API key between the quotes, and save the file.
 
 ## Install Minecraft Bedrock Edition Dedicated Server
 
 1. Download and unzip the Minecraft Bedrock Dedicated Server to a location on your hard drive.
-1. Open `gulpfile.js` and update the `dedicatedServerPath` variable to the folder where your dedicated server is located.
-1. Run these three commands:
+1. In the Minecraft Codex code directory, open `gulpfile.js` and update the `dedicatedServerPath` variable to the folder where your dedicated server is located.
+1. Run these three commands from the code directory:
    `gulp updateconfig`
    `gulp updateserver`
    `gulp updateworld`
 1. Those commands will:
+
    - Add additional configuration files that enable this module to make net requests on Dedicated Server.
    - Update server configuration properties (`server.properties`)
    - Reset the Minecraft Dedicated Server to the default world for the Codex World.
-1. You can run Bedrock Dedicated Server directly by running `bedrock_server` within your Bedrock Server directory for testing. For server debugging, you need to use `gulp serve` from your code directory.
 
 1. The first time you run Bedrock Dedicated Server, you may see a prompt within Windows to enable ports on your firewall for public and/or private networks.
    Within the pop up Firewall prompt in Windows that you may receive, you will want to potentially enable Bedrock Server port access on your Private networks.
    Alternately, ensure at least ports 19132 and 19133 are open to Bedrock Dedicated Server via your Firewall tools.
-
-1. Run the dedicated server from it's directory once to get it up and running. After it has completed loading (you will see the message "Debugger Listening" on the console), type in the following command to ensure you have full access to controls in game.
-   `op <your username>`
 1. Ensure that local Minecraft local clients can connect to your locally-hosted server - to do this, you need to enable 'loopback' connections for Minecraft UWP.
 
    To enable loopback for Minecraft on Windows, run:
@@ -58,13 +55,20 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
    npm run enablemcpreviewloopback
    ```
 
+1. You can run Bedrock Dedicated Server directly by running `bedrock_server` within your Bedrock Server directory for testing. For server debugging, you need to use `gulp serve` from your code directory, typically from the VSCode terminal.
+1. Run the dedicated server from it's directory once to get it up and running. After it has completed loading (you will see the message "Debugger Listening" on the console), type in the following command to ensure you have full access to controls in game.
+   `op <your username>`
+
 ## Building and Deploying
 
 1. To build and deploy the application run `gulp`. To have it continuously re-build as you make changes, run `gulp serve`. This will stop the server and restart it with your latest code regularly. If you just want continuous builds, then run `gulp watch`
 1. The deployment step automatically moves the compiled code to a Minecraft Behavior Pack folder within your Dedicated Server.
-1. Open Minecraft (Bedrock Edition) and click Play. Select "Servers".
+
+## Connecting to the Dedicated Server
+
+1. Open Minecraft Preview and click Play. Select "Servers".
    The first time you play, you will need to add a server:
-1. Select Add Server
+1. Scroll all the way down on the left side to and select Add Server
 1. Type a name for the server ("local") and use a Server Address of 127.0.0.1 if you are running Dedicated Server on the same machine.
 1. Select the server, and select Join Server.
 
@@ -75,8 +79,8 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 Use the following steps to debug:
 
 1. Make sure you have the Minecraft Bedrock Edition Debugger installed within Visual Studio Code, or this won't work properly, make sure it is version 0.2.0 or later
-2. Running `gulp serve` in your code folder will start the server running, and then you can run the debugger which will automatically connect to the server.
-3. You can set breakpoints in the TypeScript files directly.
+2. Running `gulp serve` in your code folder will start the server running, and then you can run the debugger from VSCode which will automatically connect to the server.
+3. You can set breakpoints in the TypeScript files directly. NOTE: The code in CodexBot is not hitting breakpoints correctly, this is a known error and being looked at.
 
 ## Interacting with the NPC
 
