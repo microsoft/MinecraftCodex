@@ -12,12 +12,15 @@ function tickMain() {
   mainTickCount++;
   if (game) game.processTick();
 
+  // we need some arbitrary flag to say when the game should 'end' even though we never do
   if (mainTickCount == 999999) {
     gameEnd = true;
   }
 }
 
 //register your game test start, which returns a GameTest object
+// this is what creates teh structure in the world that acts as the origin for the simulatedplayer
+// and creates the box with the button to restart GameTest
 GameTest.register("codex", "codex", (gameTest) => {
   const overworld = world.getDimension("overworld");
 
@@ -37,9 +40,5 @@ GameTest.register("codex", "codex", (gameTest) => {
     gameTest.assert(gameEnd, "Game runs forever");
   });
 })
-  .maxTicks(800000)
+  .maxTicks(800000) // run the code forever
   .structureName("codex:codex"); // load the structure file at structures/codex/codex.mcstructure
-
-export function sendChat(message: string) {
-  world.getDimension("overworld").runCommand("say " + message);
-}
