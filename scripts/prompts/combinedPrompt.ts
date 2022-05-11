@@ -13,7 +13,7 @@ export let context: Context = {
 // getLocation() : BlockLocation - returns the location from the simulated player
 // navigateLocation(worldLocation: Location : Block, speed?: number) : Promise<NavigationResult> - path find through the world to a location
 // findBlock(type: string, maxRadius: number, numFind : number = 1): Block [] - Returns the an arry of blocks closest to the simulated player of the type given within the radius.
-// folllowEntity(entity: Entity, speed? : number): Promise<void> - Orders the simulated player to move to the given entity.
+// followEntity(entity: Entity, speed? : number): Promise<void> - Orders the simulated player to move to the given entity.
 // mineBlock(blockArr : Block []) : boolean - simulated player mines a block and places it in their inventory
 // collectNearbyItems() : number - Collects nearby items that may be on the ground - for example, mined ore
 // placeItem(name: string): boolean - Places an inventory item of the same name on the ground, if the bot has the item
