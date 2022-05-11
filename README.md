@@ -5,7 +5,7 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 ## Requirements
 
 - Minecraft Launcher and Minecraft Bedrock Edition (Minecraft Windows)
-  - You need to be an owner of Minecraft in order to get the preview edition, PC GamePass, or GamePass Ultimate members already have access to it. If you are a Microsoft employee, go to `https://studiostokens.azurewebsites.net/` to get your free GamePass subscription if you do not have it already
+  - You need to be an owner of Minecraft in order to get the preview edition, PC GamePass, or GamePass Ultimate members already have access to it.
   - Download the Xbox app from Microsoft Store, and sign in with your consumer MSA account (same thing as your Xbox account if you have one) `https://www.microsoft.com/store/productId/9MV0B5HZVK9Z`
   - Open the Xbox App to install Minecraft Preview `(https://www.microsoft.com/store/productId/9P5X4QVLC2XR)`
 - LTS version of [Node.JS]`(https://nodejs.org/en/)`
@@ -156,6 +156,10 @@ This example shows how we can enable Codex to generate a specific API's code by 
 
 To improve a Large Language model's ability to understand a specific domain, you can fine tune a model - effectively re-training it with a corpus of code, example interactions, documentation and other context. In the case of the Minecraft bot, we could significantly improve the bot's abilities by fine-tuning a model with the entire SimulatedPlayer API documentation, examples of interactions between players and the NPC, information about Minecraft, and more.
 
+## Important Info on the GameTest APIs
+
+GameTest is a beta API from the Minecraft team, and is subject to change with updates. We will work to keep this repo up to date with new releases. The documentation is currently being written, so there are a few things to be aware of, as noted in the next section.
+
 ## Important Tips
 
 - If you edit the manifest.json file, ignore any warnings it gives you about the existing file
@@ -173,9 +177,13 @@ If you don't see the console trying to autocomplete to your test, then you have 
 2. tickMain calls into an instance of CodexGame, which handles the game logic, creates the CodexBot, and manages state logic for the bot
 3. CodexGame is also where we call `eval()` to run the generated code.
 4. CodexBot is a wrapper around the SimulatedPlayer class from Minecraft, which handles the bot's logic
-5. Crafting class is a static class that manages a database of recipes and will remove items from the bot and return to it the item if it can craft the item
+5. Crafting class is a static class that manages a database of recipes and will remove items from the bot and return to it the item if it can craft the item. It's not a true "crafting" function so you can alter it to not remove items from the bot, or to give the bot exactly what it needs to craft, or even just give the bot the item you want it to have directly.
 6. The prompt class manages the text input to Codex that informs it of how we expect input to be delivered. In this case, we are using the .\prompts\combinedPrompts.ts file.
 7. TimedQueue is a class to manage promise chaining with wait functions to create complex behaviors
 8. The GameTest APIs can be viewed in the node_modules/@types folder. They are mojang-gametest, mojang-minecraft and mojang-net. mojang-net is included with the source depot and copied into the node_modules folder. The others are npm packages.
-9. The .vscode json files include required settings for this code to copy to the correct locations, enable network passthrough, signify which code modules we are importing from Minecraft, and request download of the required extensions for VSCode
+9. The .vscode json files include info on which code modules we are importing from Minecraft, and request download of the required extensions for VSCode
 10. The actions taken by gulp are managed by the gulpfile.js file. It transpiles the Typescript to Javascript, and copies the files to the correct locations.
+11. All functions that are act on or are part of SimulatedPlayer are relative to a zero point of where the GameTest structure manifests. You will see code in CodexBot that ensures positions are updated correctly.
+12. The location you read out of SimulatedPlayer is a world location, and is NOT relative to anything
+13. There are two location types: BlockLocation and Location. You will find yourself having to convert back and forth dependin on the types the functions are requesting
+14. Properties of most GameTest objects can be queried through getComponent() and passing in a string value. You can enumerate the components through getComponents() on the same object.
