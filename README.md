@@ -9,6 +9,7 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
   - Download the Xbox app from Microsoft Store, and sign in with your consumer MSA account (same thing as your Xbox account if you have one) `https://www.microsoft.com/store/productId/9MV0B5HZVK9Z`
   - Open the Xbox App to install Minecraft Preview `(https://www.microsoft.com/store/productId/9P5X4QVLC2XR)`
 - LTS version of [Node.JS]`(https://nodejs.org/en/)`
+- - [Visual Studio Code](https://code.visualstudio.com/) - VS Code has Minecraft development extension 
 - OPTIONAL: Clear chat texture pack to make it easier to see the bot actions without the dim screen of chat. Download from here and follow install directions: https://mcpedl.com/clear-chat-tranparent-chat/
 
 ## Setup
