@@ -3,7 +3,7 @@
 const bpfoldername = "codexworld";
 const useMinecraftPreview = false; // Whether to target the "Minecraft Preview" version of Minecraft vs. the main store version of Minecraft
 const useMinecraftDedicatedServer = true; // Whether to use Bedrock Dedicated Server - see https://www.minecraft.net/download/server/bedrock
-const dedicatedServerPath = `D:\\mc\\bds\\server_1.19\\`; // if using Bedrock Dedicated Server, where to find the extracted contents of the server zip
+const dedicatedServerPath = `c:\\MinecraftServer\\`; // if using Bedrock Dedicated Server, where to find the extracted contents of the server zip
 
 // === END CONFIGURABLE VARIABLES
 
@@ -122,6 +122,10 @@ function getTargetWorldBackupPath() {
   return "backups/worlds/" + activeWorldFolderName;
 }
 
+function getTargetBuildWorldBackupPath() {
+  return "backups/worlds/BuildWorld";
+}
+
 function getDevConfigPath() {
   return "config";
 }
@@ -132,6 +136,10 @@ function getDevServerPath() {
 
 function getDevWorldPath() {
   return "worlds/default";
+}
+
+function getBuildWorldPath() {
+  return "worlds/buildWorld";
 }
 
 function getDevWorldBackupPath() {
@@ -235,6 +243,11 @@ function deploy_localmc_world() {
   return gulp.src([getDevWorldPath() + "/**/*"]).pipe(gulp.dest(getTargetWorldPath()));
 }
 
+function deploy_localbuild_world() {
+  console.log("Copying world 'worlds/build/' to '" + getTargetWorldPath() + "'");
+  return gulp.src([getBuildWorldPath() + "/**/*"]).pipe(gulp.dest(getTargetWorldPath()));
+}
+
 function ingest_localmc_world() {
   console.log("Ingesting world '" + getTargetWorldPath() + "' to '" + getDevWorldPath() + "'");
   return gulp.src([getTargetWorldPath() + "/**/*"]).pipe(gulp.dest(getDevWorldPath()));
@@ -336,6 +349,7 @@ exports.updateworld = gulp.series(
   clean_localmc_world,
   deploy_localmc_world
 );
+exports.deploybuildworld = gulp.series(clean_localmc_world, deploy_localbuild_world);
 exports.ingestworld = gulp.series(clean_dev_world_backup, backup_dev_world, clean_dev_world, ingest_localmc_world);
 exports.updateconfig = gulp.series(clean_localmc_config, deploy_localmc_config);
 exports.updateserver = gulp.series(deploy_localmc_server);

@@ -54,7 +54,7 @@ export default class CodexGame {
     this.gameTest = test;
 
     this.overWorld = world.getDimension("overworld");
-    this.overWorld.runCommand("say Game Initialized");
+    this.overWorld.runCommand("say Game Initialized, Codex running");
 
     // Spawn a new CodexBot instance, which wraps SimulatedPlayer, next to the main player
     this.bot = new CodexBot(this);

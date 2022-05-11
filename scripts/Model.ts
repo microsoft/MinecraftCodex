@@ -1,4 +1,5 @@
 import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "mojang-net";
+import { game } from "./main.js";
 import { CODEX_API_KEY } from "./vars.js";
 
 // Model Class
@@ -10,6 +11,7 @@ export default class Model {
     this.completions = [];
   }
 
+  // send the text we typed into Minecraft to OpenAI to get the code for the bot to run
   async getCompletion(prompt: string) {
     const req = new HttpRequest("https://api.openai.com/v1/engines/davinci-codex-002-msft/completions");
 
@@ -19,6 +21,9 @@ export default class Model {
       new HttpHeader("Authorization", `Bearer ${CODEX_API_KEY}`),
     ];
 
+    // temperature is how creative Codex can get, you want to keep this at 0 for repeatable results in code
+    // stop is the string that says "this is the end of the code", the structure of the prompts file uses it to denote the next command
+    // max tokens is the number of "words" codex should return, 500 being a good number to get a complete response for code
     req.body = JSON.stringify({
       prompt: prompt,
 
@@ -35,6 +40,7 @@ export default class Model {
     console.log("response code: " + response);
 
     if (response.status >= 400) {
+      game?.bot.chat("Error respons  " + response.status);
       throw new Error(`${response.status} ${response.statusText}`);
     }
 

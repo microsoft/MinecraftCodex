@@ -37,6 +37,7 @@ export default class Prompt {
     this.createDialog();
   }
 
+  // adds text directly to the prompt file, like for when we are talking for the bot, so it can keep context
   addText(textResponse: string) {
     this.interactions.push(textResponse);
   }
