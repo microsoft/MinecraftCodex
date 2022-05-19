@@ -13,7 +13,7 @@ export default class Model {
 
   // send the text we typed into Minecraft to OpenAI to get the code for the bot to run
   async getCompletion(prompt: string) {
-    const req = new HttpRequest("https://api.openai.com/v1/engines/davinci-codex-002-msft/completions");
+    const req = new HttpRequest("https://api.openai.com/v1/engines/code-davinci-002/completions");
 
     req.headers = [
       new HttpHeader("Content-Type", "application/json"),
