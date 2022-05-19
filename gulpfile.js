@@ -36,10 +36,6 @@ function clean_build(callbackFunction) {
   );
 }
 
-function copy_net_types() {
-  return gulp.src(["to_node_modules/@types/**/*"]).pipe(gulp.dest("node_modules/@types"));
-}
-
 function copy_behavior_packs() {
   return gulp.src(["behavior_packs/**/*"]).pipe(gulp.dest("build/behavior_packs"));
 }
@@ -72,7 +68,7 @@ function compile_scripts() {
     .pipe(gulp.dest("build/behavior_packs/" + bpfoldername + "/scripts"));
 }
 
-const build = gulp.series(clean_build, copy_content, copy_net_types, compile_scripts);
+const build = gulp.series(clean_build, copy_content, compile_scripts);
 
 function clean_localmc(callbackFunction) {
   if (!bpfoldername || !bpfoldername.length || bpfoldername.length < 2) {
