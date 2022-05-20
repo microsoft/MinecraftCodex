@@ -4,6 +4,10 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 
 ## Requirements
 
+- An [OpenAI account](https://openai.com/api/)
+  - [OpenAI API Key](https://beta.openai.com/account/api-keys).
+  - [OpenAI Organization Id](https://beta.openai.com/account/org-settings). If you have multiple organizations, please update your [default organization](https://beta.openai.com/account/api-keys) to the one that has access to codex engines before getting the organization Id.
+  - [OpenAI Engine Id](https://beta.openai.com/docs/engines/codex-series-private-beta). The name of the Codex model you're using. This repository was primarily tested using `code-davinci-002`. See [here](#what-openai-engines-are-available-to-me) for checking available engines.
 - Minecraft Launcher and Minecraft Bedrock Edition (Minecraft Windows)
   - You need to be an owner of Minecraft in order to get the preview edition, PC GamePass, or GamePass Ultimate members already have access to it.
   - Download the Xbox app from Microsoft Store, and sign in with your consumer MSA account (same thing as your Xbox account if you have one) `https://www.microsoft.com/store/productId/9MV0B5HZVK9Z`
@@ -17,11 +21,12 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 1. Clone the repo wherever you like: `git clone https://github.com/microsoft/MinecraftCodex.git`. The project is setup to work with your local Minecraft install.
 1. Open using VSCode, you will get a recommendations to install Minecraft extensions to enable debugging
 1. Open Terminal in VSCode in the code directory, and run `npm install` to pull down the package dependencies.
-1. Under the scripts folder, create a file vars.ts with the following key value pairs:
+1. Under the scripts folder, create a file called `vars.ts` with the following key value pairs:
    ```
-    export let CODEX_API_KEY='your api key goes here';
-    export let DEBUG=true;
-    export default CODEX_API_KEY;
+   export let OPENAI_API_KEY = "<YOUR_KEY_HERE>";
+   export let OPENAI_ORGANIZATION_ID = "<YOUR_ORG_ID_HERE>";
+   export let OPENAI_ENGINE_ID = "<YOUR_CODEX_MODEL_NAME_HERE>";
+   export let DEBUG = false;
    ```
 1. Place your OpenAI API key between the quotes, and save the file.
 
