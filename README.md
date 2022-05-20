@@ -108,7 +108,7 @@ We coax the correct code and natural language out of Codex through a discipline 
 In the `codexPrompt` folder, you'll find the prompts used to give the model examples. You'll notice that the prompts have some general context, and are modelled as a series of comments (natural language) and code:
 
 ```js
-//Minecraft bot commands, using mineflayer. When the comment is conversational, the bot will respond as a helpful minecraft bot. Otherwise, it will do as asked
+//Minecraft bot commands, using the SimulatedPlayer library. When the comment is conversational, the bot will respond as a helpful minecraft bot. Otherwise, it will do as asked.
 
 // Look at me
 bot.lookAtEntity();
