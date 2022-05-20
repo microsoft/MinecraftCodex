@@ -1,7 +1,6 @@
 import { world } from "mojang-minecraft";
 import * as GameTest from "mojang-gametest";
 import CodexGame from "./CodexGame.js";
-import WebCommand from "./WebCommand.js";
 
 let mainTickCount = 0;
 let gameEnd = false;
@@ -30,9 +29,6 @@ GameTest.register("codex", "codex", (gameTest) => {
   game = new CodexGame(gameTest);
 
   overworld.runCommand("say Game Started");
-
-  let commandApp = new WebCommand();
-  commandApp.runThis();
 
   overworld.runCommand("say Web Command Listening");
 
