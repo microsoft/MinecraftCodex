@@ -4,18 +4,19 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 
 ## Requirements
 
-- Minecraft Launcher and Minecraft Bedrock Edition (Minecraft Windows)
-  - You need to be an owner of Minecraft in order to get the preview edition, PC GamePass, or GamePass Ultimate members already have access to it.
+- You need to be an owner of Minecraft, or have PC GamePass, in order to get access to the Minecraft Preview.
+  - You can access Minecraft from the MS Store here to make sure you have access: `https://www.microsoft.com/store/productId/9PGW18NPBZV5`
   - Download the Xbox app from Microsoft Store, and sign in with your consumer MSA account (same thing as your Xbox account if you have one) `https://www.microsoft.com/store/productId/9MV0B5HZVK9Z`
-  - Open the Xbox App to install Minecraft Preview `(https://www.microsoft.com/store/productId/9P5X4QVLC2XR)`
-- LTS version of [Node.JS]`(https://nodejs.org/en/)`
-- - [Visual Studio Code](https://code.visualstudio.com/) - VS Code has Minecraft development extension
-- OPTIONAL: Clear chat texture pack to make it easier to see the bot actions without the dim screen of chat. Download from here and follow install directions: https://mcpedl.com/clear-chat-tranparent-chat/
+  - Open the Xbox App to install Minecraft Preview `(https://www.microsoft.com/store/productId/9P5X4QVLC2XR)`. Minecraft Preview should be v 1.19
+- LTS 16.15 version of [Node.JS]`(https://nodejs.org/en/)`
+- - [Visual Studio Code](https://code.visualstudio.com/)
+- OPTIONAL: Clear chat texture pack to make it easier to see the bot actions without the dim screen of chat. Download from here and follow install directions: `https://mcpedl.com/clear-chat-tranparent-chat/`
 
 ## Setup
 
 1. Clone the repo wherever you like: `git clone https://github.com/microsoft/MinecraftCodex.git`. The project is setup to work with your local Minecraft install.
-1. Open using VSCode, you will get a recommendations to install Minecraft extensions to enable debugging
+1. Open the folder you placed the repo in locally in VSCode
+1. You will get a recommendations to install Minecraft extensions to enable debugging, you want to accept those
 1. Open Terminal in VSCode in the code directory, and run `npm install` to pull down the package dependencies.
 1. Under the scripts folder, create a file vars.ts with the following key value pairs:
    ```
@@ -28,8 +29,9 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
 ## Install Minecraft Bedrock Edition Dedicated Server
 
 1. Download and unzip the Minecraft Bedrock Dedicated Server to a location on your hard drive.
-1. In the Minecraft Codex code directory, open `gulpfile.js` and update the `dedicatedServerPath` variable to the folder where your dedicated server is located.
-1. Run these three commands from the code directory:
+1. In the Minecraft Codex code directory, open `gulpfile.js` and update the `dedicatedServerPath` variable to the folder where your dedicated server is located. Note: it must end with a '\\' character
+1. You will likely need to disable PowerShell signing requirements for the session. In the VSCode Terminal type: `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` You will need to do this every time you open a new terminal, or restart VSCode. It only works on the current process, so nowhere else should this take effect.
+1. Run these three commandsin the VSCode terminal, which should be in the repo folder.
    `gulp updateconfig`
    `gulp updateserver`
    `gulp updateworld`
@@ -56,13 +58,13 @@ This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecra
    npm run enablemcpreviewloopback
    ```
 
-1. You can run Bedrock Dedicated Server directly by running `bedrock_server` within your Bedrock Server directory for testing. For server debugging, you need to use `gulp serve` from your code directory, typically from the VSCode terminal.
+1. To run the game server with proper configs and defaults, you need to use `gulp serve` from your code directory, typically from the VSCode terminal.
 1. Run the dedicated server from it's directory once to get it up and running. After it has completed loading (you will see the message "Debugger Listening" on the console), type in the following command to ensure you have full access to controls in game.
    `op <your username>`
 
 ## Building and Deploying
 
-1. To have it continuously re-build as you make changes, run `gulp serve`. This will stop the server and restart it with your latest code regularly.
+1. To have it continuously re-build as you make changes, run `gulp watch`. This will stop the server and restart it with your latest code regularly.
 1. The deployment step automatically moves the compiled code to a Minecraft Behavior Pack folder within your Dedicated Server.
 
 ## Connecting to the Dedicated Server
@@ -104,6 +106,8 @@ NPC: bot.chat("Because they're so versatile!")
 The Codex model being used in this sample has never seen the SimulatedPlayer API we're asking it to use (it's a new API that wasn't in its training set). In order to get the model to use the SimulatedPlayer API, we need to engineer prompts that give the model examples of the kinds of commands it will receive and the kind of code it should write. From just a few Natual Language to Code examples, we can use the model to generate new code from new commands.
 
 We coax the correct code and natural language out of Codex through a discipline called prompt engineering. Large Language Models like GPT-3 and Codex are trained to guess the next word in a sentence, or more generally, the next token in a sequence. They can do this continuously to genereate whole sentences, paragraphs, lines of code and functions. To coax very specific code out of the models, it's best to give prompts that convey our intent and give examples of what we're looking for.
+
+Please note: The NPC capabilities are limited to abilities in the capabilities of the SimulatedPlayer API, along with some extra capabilities we gave it. It can walk, chat with you, walk around, look at you, follow you, mine blocks, and craft items (etc.) It can't currently use visual cues about the world around it or handle capabilities outside of the API spec. You can code new behaviors yourself and alter the prompts to enable the bot to do what you would like, and we encourage you to do so!
 
 In the `codexPrompt` folder, you'll find the prompts used to give the model examples. You'll notice that the prompts have some general context, and are modelled as a series of comments (natural language) and code:
 
