@@ -2,6 +2,8 @@
 
 This prototype uses GPT-3 Codex to power a Non-Player Character (NPC) in Minecraft. Through the discipline of "prompt engineering" (see section below), we show the model how to use the Minecraft SimulatedPlayer API to write code to navigate the world, mine, craft and even carry on conversation.
 
+![Minecraft Codex gif](minecraft-codex.gif)
+
 ## Requirements
 
 - You need to be an owner of Minecraft, or have PC GamePass, in order to get access to the Minecraft Preview.
