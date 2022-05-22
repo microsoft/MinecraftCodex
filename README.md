@@ -192,3 +192,16 @@ If you don't see the console trying to autocomplete to your test, then you have 
 12. The location you read out of SimulatedPlayer is a world location, and is NOT relative to anything
 13. There are two location types: BlockLocation and Location. You will find yourself having to convert back and forth dependin on the types the functions are requesting
 14. Properties of most GameTest objects can be queried through getComponent() and passing in a string value. You can enumerate the components through getComponents() on the same object.
+
+## FAQ
+
+### What OpenAI engines are available to me?
+
+You might have access to different [OpenAI engines](https://beta.openai.com/docs/api-reference/engines) per OpenAI organization. To check what engines are available to you, one can query the [List engines API](https://beta.openai.com/docs/api-reference/engines/list) for available engines. See the following commands:
+
+- Shell
+  ```
+  curl https://api.openai.com/v1/engines \
+    -H 'Authorization: Bearer YOUR_API_KEY' \
+    -H 'OpenAI-Organization: YOUR_ORG_ID'
+  ```
