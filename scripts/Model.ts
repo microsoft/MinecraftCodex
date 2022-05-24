@@ -1,6 +1,6 @@
 import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "mojang-net";
 import { game } from "./main.js";
-import { CODEX_API_KEY } from "./vars.js";
+import { OPENAI_API_KEY, OPENAI_ENGINE_ID, OPENAI_ORGANIZATION_ID } from "./vars.js";
 
 // Model Class
 
@@ -13,12 +13,13 @@ export default class Model {
 
   // send the text we typed into Minecraft to OpenAI to get the code for the bot to run
   async getCompletion(prompt: string) {
-    const req = new HttpRequest("https://api.openai.com/v1/engines/code-davinci-002/completions");
+    const req = new HttpRequest(`https://api.openai.com/v1/engines/${OPENAI_ENGINE_ID}/completions`);
 
     req.headers = [
       new HttpHeader("Content-Type", "application/json"),
       new HttpHeader("Accept", "application/json"),
-      new HttpHeader("Authorization", `Bearer ${CODEX_API_KEY}`),
+      new HttpHeader("Authorization", `Bearer ${OPENAI_API_KEY}`),
+      new HttpHeader("OpenAI-Organization", OPENAI_ORGANIZATION_ID),
     ];
 
     // temperature is how creative Codex can get, you want to keep this at 0 for repeatable results in code

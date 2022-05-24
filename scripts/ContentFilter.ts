@@ -1,5 +1,5 @@
 import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "mojang-net";
-import { CODEX_API_KEY } from "./vars.js";
+import { OPENAI_API_KEY } from "./vars.js";
 
 export async function detectSensitiveContent(content: string): Promise<number> {
   const req = new HttpRequest("https://api.openai.com/v1/engines/content-filter-alpha/completions");
@@ -7,7 +7,7 @@ export async function detectSensitiveContent(content: string): Promise<number> {
   req.headers = [
     new HttpHeader("Content-Type", "application/json"),
     new HttpHeader("Accept", "application/json"),
-    new HttpHeader("Authorization", `Bearer ${CODEX_API_KEY}`),
+    new HttpHeader("Authorization", `Bearer ${OPENAI_API_KEY}`),
   ];
 
   req.method = HttpRequestMethod.POST;
