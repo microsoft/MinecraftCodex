@@ -71,7 +71,7 @@ export class CodexBot {
 
     this.name = this.players[0].name;
 
-    this.simBot = thisGame.gameTest.spawnSimulatedPlayer(new BlockLocation(5, 0, 0), "steve") as Bot;
+    this.simBot = thisGame.gameTest.spawnSimulatedPlayer(new BlockLocation(5, 0, 0), "CodexBot") as Bot;
     this.simBot.chat = this.chat.bind(this);
 
     this.simBot.jumpUp = this.jumpUp.bind(this);
