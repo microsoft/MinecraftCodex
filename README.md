@@ -15,11 +15,10 @@ Please read the readme carefully to make sure you get the right bits. This repo 
   - [OpenAI Engine Id](https://beta.openai.com/docs/engines/codex-series-private-beta). The name of the Codex model you're using. This repository was primarily tested using `code-davinci-002`. See [here](#what-openai-engines-are-available-to-me) for checking available engines.
 
 - You need to be an owner of Minecraft, or have PC GamePass, in order to get access to the Minecraft Preview.
+  -This build uses the latest Minecraft Preview (version 1.19.10). You will need version 1.19.10-beta20, downloadable from https://www.minecraft.net/en-us/download/server/bedrock, and Minecraft Preview client version 1.19.10.20, which should be available shortly in respective stores.
   - You can access Minecraft from the MS Store here to make sure you have access: `https://www.microsoft.com/store/productId/9PGW18NPBZV5`
   - Download the Xbox app from Microsoft Store, and sign in with your consumer MSA account (same thing as your Xbox account if you have one) `https://www.microsoft.com/store/productId/9MV0B5HZVK9Z`
   - Open the Xbox App to install Minecraft Preview `(https://www.microsoft.com/store/productId/9P5X4QVLC2XR)`. Minecraft Preview should be v 1.19.40, published on 5.25.2022 (US date format)
-    `NOTE: The Minecraft Preview is being published today and will be available sometime the morning of May 25th. Please keep checking if it is not yet updated, it can take a bit of time for the build to propogate to all locations.`
-  - Minecraft Bedrock dedicated server, https://www.minecraft.net/en-us/download/server/bedrock 1.19.1
 - LTS 16.15 version of [Node.JS]`(https://nodejs.org/en/)`
 - - [Visual Studio Code](https://code.visualstudio.com/)
 - OPTIONAL: Clear chat texture pack to make it easier to see the bot actions without the dim screen of chat. Download from here and follow install directions: `https://mcpedl.com/clear-chat-tranparent-chat/`
