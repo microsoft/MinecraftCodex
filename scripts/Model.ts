@@ -41,7 +41,7 @@ export default class Model {
     console.log("response code: " + response);
 
     if (response.status >= 400) {
-      game?.bot.chat("Error respons  " + response.status);
+      game?.bot.chat("Error response  " + response.status);
       throw new Error(`${response.status} ${response.statusText}`);
     }
 
