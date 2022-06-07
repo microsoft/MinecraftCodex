@@ -14,14 +14,16 @@ Please read the readme carefully to make sure you get the right bits. This repo 
   - [OpenAI Organization Id](https://beta.openai.com/account/org-settings). If you have multiple organizations, please update your [default organization](https://beta.openai.com/account/api-keys) to the one that has access to codex engines before getting the organization Id.
   - [OpenAI Engine Id](https://beta.openai.com/docs/engines/codex-series-private-beta). The name of the Codex model you're using. This repository was primarily tested using `code-davinci-002`. See [here](#what-openai-engines-are-available-to-me) for checking available engines.
 
-- You need to be an owner of Minecraft, or have PC GamePass, in order to get access to the Minecraft Preview.
-  -This build uses the latest Minecraft Preview (version 1.19.10). You will need version 1.19.10-beta20, downloadable from https://www.minecraft.net/en-us/download/server/bedrock, and Minecraft Preview client version 1.19.10.20, which the below links will help you to gather.
+- You need to be an owner of Minecraft, or have PC GamePass, in order to use Minecraft or Minecraft Preview.
+  - This sample uses a separate Dedicated Server and a Minecraft client app. For more information on Minecraft Bedrock Edition, Dedicated Server and how you can use scripting with them, see [this article](https://docs.microsoft.com/minecraft/creator/documents/scriptingservers).
+  - This build uses the latest Minecraft version (version 1.19.0 or higher). You will need a version of Minecraft Dedicated Server, downloadable from https://www.minecraft.net/en-us/download/server/bedrock, and Minecraft client version 1.19.0 or higher, which the below links will help you to gather.
+  - Note that Minecraft has both main and "Preview" versions of Minecraft: Bedrock Edition. You can now use the main Minecraft editions to use this sample; you no longer need to use the Minecraft Preview app with this sample in particular.
   - You can access Minecraft from the MS Store here to make sure you have access: `https://www.microsoft.com/store/productId/9PGW18NPBZV5`
   - Download the Xbox app from Microsoft Store, and sign in with your consumer MSA account (same thing as your Xbox account if you have one) `https://www.microsoft.com/store/productId/9MV0B5HZVK9Z`
-  - Open the Xbox App to install Minecraft Preview `(https://www.microsoft.com/store/productId/9P5X4QVLC2XR)`. Minecraft Preview should be v 1.19.40, published on 5.25.2022 (US date format)
-- LTS 16.15 version of [Node.JS]`(https://nodejs.org/en/)`
-- - [Visual Studio Code](https://code.visualstudio.com/)
-- OPTIONAL: Clear chat texture pack to make it easier to see the bot actions without the dim screen of chat. Download from here and follow install directions: `https://mcpedl.com/clear-chat-tranparent-chat/`
+  - Open the Xbox App to install Minecraft `(https://www.microsoft.com/store/productId/9P5X4QVLC2XR)`.
+    - LTS 16.15 version of [Node.JS]`(https://nodejs.org/en/)`
+    - [Visual Studio Code](https://code.visualstudio.com/)
+    - OPTIONAL: Clear chat texture pack to make it easier to see the bot actions without the dim screen of chat. Download from here and follow install directions: `https://mcpedl.com/clear-chat-tranparent-chat/`
 
 ## Setup
 
@@ -81,7 +83,7 @@ Please read the readme carefully to make sure you get the right bits. This repo 
 
 ## Connecting to the Dedicated Server
 
-1. Open Minecraft Preview and click Play. Select "Servers".
+1. Open your Minecraft client and click Play. Select "Servers".
    The first time you play, you will need to add a server:
 1. Scroll all the way down on the left side to and select Add Server
 1. Type a name for the server ("local") and use a Server Address of 127.0.0.1 if you are running Dedicated Server on the same machine.
