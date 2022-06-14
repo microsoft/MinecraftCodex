@@ -312,10 +312,8 @@ export default class CodexGame {
    */
   evaluate(code: string, args = {}) {
     return function evaluateEval() {
-      const argsStr = Object.keys(args)
-        .map((key) => `${key} = this.${key}`)
-        .join(",");
-      const argsDef = argsStr ? `let ${argsStr};` : "";
+      const argsStr = Object.keys(args).join(",");
+      const argsDef = `let { ${argsStr} } = this;`;
 
       return eval(`(async () => {${argsDef}${code}})();`);
     }.call(args);
