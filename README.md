@@ -11,8 +11,8 @@ Please read the readme carefully to make sure you get the right bits. This repo 
 - An [OpenAI account](https://openai.com/api/)
 
   - [OpenAI API Key](https://beta.openai.com/account/api-keys).
-  - [OpenAI Organization Id](https://beta.openai.com/account/org-settings). If you have multiple organizations, please update your [default organization](https://beta.openai.com/account/api-keys) to the one that has access to codex engines before getting the organization Id.
-  - [OpenAI Engine Id](https://beta.openai.com/docs/engines/codex-series-private-beta). The name of the Codex model you're using. This repository was primarily tested using `code-davinci-002`. See [here](#what-openai-engines-are-available-to-me) for checking available engines.
+  - [OpenAI Organization Id](https://beta.openai.com/account/org-settings). If you have multiple organizations, please update your [default organization](https://beta.openai.com/account/api-keys) to the one that has access to codex models before getting the organization Id.
+  - [OpenAI Model Id](https://beta.openai.com/docs/models/codex-series-private-beta). The name of the Codex model you're using. This repository was primarily tested using `code-davinci-002`. See [here](#what-openai-models-are-available-to-me) for checking available models.
 
 - You need to be an owner of Minecraft, or have PC GamePass, in order to use Minecraft or Minecraft Preview.
   - This sample uses a separate Dedicated Server and a Minecraft client app. For more information on Minecraft Bedrock Edition, Dedicated Server and how you can use scripting with them, see [this article](https://docs.microsoft.com/minecraft/creator/documents/scriptingservers).
@@ -35,7 +35,7 @@ Please read the readme carefully to make sure you get the right bits. This repo 
    ```
    export let OPENAI_API_KEY = "<YOUR_KEY_HERE>";
    export let OPENAI_ORGANIZATION_ID = "<YOUR_ORG_ID_HERE>";
-   export let OPENAI_ENGINE_ID = "<YOUR_CODEX_MODEL_NAME_HERE>";
+   export let OPENAI_MODEL_ID = "<YOUR_CODEX_MODEL_NAME_HERE>";
    export let DEBUG = false;
    ```
 1. Place your OpenAI API key between the quotes, and save the file.
@@ -209,13 +209,13 @@ If you don't see the console trying to autocomplete to your test, then you have 
 
 ## FAQ
 
-### What OpenAI engines are available to me?
+### What OpenAI models are available to me?
 
-You might have access to different [OpenAI engines](https://beta.openai.com/docs/api-reference/engines) per OpenAI organization. To check what engines are available to you, one can query the [List engines API](https://beta.openai.com/docs/api-reference/engines/list) for available engines. See the following commands:
+You might have access to different [OpenAI models](https://beta.openai.com/docs/api-reference/models) per OpenAI organization. To check what engines are available to you, one can query the [List models API](https://beta.openai.com/docs/api-reference/models/list) for available engines. See the following commands:
 
 - Shell
   ```
-  curl https://api.openai.com/v1/engines \
+  curl https://api.openai.com/v1/models \
     -H 'Authorization: Bearer YOUR_API_KEY' \
     -H 'OpenAI-Organization: YOUR_ORG_ID'
   ```

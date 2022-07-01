@@ -1,6 +1,6 @@
 import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "mojang-net";
 import { game } from "./main.js";
-import { OPENAI_API_KEY, OPENAI_ENGINE_ID, OPENAI_ORGANIZATION_ID } from "./vars.js";
+import { OPENAI_API_KEY, OPENAI_MODEL_ID, OPENAI_ORGANIZATION_ID } from "./vars.js";
 
 // Model Class
 
@@ -13,7 +13,7 @@ export default class Model {
 
   // send the text we typed into Minecraft to OpenAI to get the code for the bot to run
   async getCompletion(prompt: string) {
-    const req = new HttpRequest(`https://api.openai.com/v1/engines/${OPENAI_ENGINE_ID}/completions`);
+    const req = new HttpRequest(`https://api.openai.com/v1/completions`);
 
     req.headers = [
       new HttpHeader("Content-Type", "application/json"),
@@ -26,6 +26,7 @@ export default class Model {
     // stop is the string that says "this is the end of the code", the structure of the prompts file uses it to denote the next command
     // max tokens is the number of "words" codex should return, 500 being a good number to get a complete response for code
     req.body = JSON.stringify({
+      model: OPENAI_MODEL_ID,
       prompt: prompt,
 
       max_tokens: 500,
@@ -41,7 +42,7 @@ export default class Model {
     console.log("response code: " + response);
 
     if (response.status >= 400) {
-      game?.bot.chat("Error response  " + response.status);
+      game?.bot.chat("Error response " + response.status);
       throw new Error(`${response.status} ${response.statusText}`);
     }
 
