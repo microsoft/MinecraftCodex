@@ -263,13 +263,9 @@ export default class CodexGame {
 
     if (completion) {
       let sensitiveContentFlag = await detectSensitiveContent(message + "\n" + completion);
-      // The flag can be 0, 1 or 2, corresponding to 'safe', 'sensitive' and 'unsafe'
+      // The flag can be 0 or 1 corresponding to 'safe', 'sensitive' in different categories, but we only care if it's flagged
       if (sensitiveContentFlag > 0) {
-        console.warn(
-          sensitiveContentFlag === 1
-            ? "Your message or the model's response may have contained sensitive content."
-            : "Your message or the model's response may have contained unsafe content."
-        );
+        console.warn("Your message or the model's response may have contained sensitive content.");
         this.bot.chat("Let's talk about something else");
         return;
       }
