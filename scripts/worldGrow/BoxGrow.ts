@@ -1,5 +1,4 @@
-import { Block, BlockLocation, MinecraftBlockTypes, Vector } from "mojang-minecraft";
-import { world } from "mojang-minecraft";
+import { Block, BlockLocation, MinecraftBlockTypes, Vector, world } from "@minecraft/server";
 import BlockBounds from "./BlockBounds.js";
 import BlockMutate from "./BlockGrow.js";
 

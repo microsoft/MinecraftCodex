@@ -1,4 +1,4 @@
-import { Player, EntityInventoryComponent, ItemStack, Items, MinecraftItemTypes } from "mojang-minecraft";
+import { Player, EntityInventoryComponent, ItemStack, Items, MinecraftItemTypes, ItemTypes } from "@minecraft/server";
 import IRecipe from "./IRecipe.js";
 
 export default class Crafting {
@@ -35,11 +35,11 @@ export default class Crafting {
       let slotItem = playerInventoryContainer.getItem(i);
 
       if (slotItem) {
-        if (ingredients[slotItem.id]) {
-          ingredients[slotItem.id] -= slotItem.amount;
+        if (ingredients[slotItem.typeId]) {
+          ingredients[slotItem.typeId] -= slotItem.amount;
 
-          if (ingredients[slotItem.id] < 0) {
-            ingredients[slotItem.id] = 0;
+          if (ingredients[slotItem.typeId] < 0) {
+            ingredients[slotItem.typeId] = 0;
           }
         }
       }
@@ -77,17 +77,17 @@ export default class Crafting {
     for (let i = 0; i < playerInventoryContainer.size; i++) {
       let slotItem = playerInventoryContainer.getItem(i);
 
-      if (slotItem && ingredients[slotItem.id]) {
-        if (slotItem.amount > ingredients[slotItem.id]) {
-          slotItem.amount -= ingredients[slotItem.id];
+      if (slotItem && ingredients[slotItem.typeId]) {
+        if (slotItem.amount > ingredients[slotItem.typeId]) {
+          slotItem.amount -= ingredients[slotItem.typeId];
           playerInventoryContainer.setItem(i, slotItem);
-          ingredients[slotItem.id] = 0;
-        } else if (slotItem.amount == ingredients[slotItem.id]) {
-          playerInventoryContainer.setItem(i, new ItemStack(MinecraftItemTypes.air, 1));
-          ingredients[slotItem.id] = 0;
-        } else if (slotItem.amount < ingredients[slotItem.id]) {
-          ingredients[slotItem.id] -= slotItem.amount;
-          playerInventoryContainer.setItem(i, new ItemStack(MinecraftItemTypes.air, 1));
+          ingredients[slotItem.typeId] = 0;
+        } else if (slotItem.amount == ingredients[slotItem.typeId]) {
+          playerInventoryContainer.setItem(i, new ItemStack(ItemTypes.get("air"), 1));
+          ingredients[slotItem.typeId] = 0;
+        } else if (slotItem.amount < ingredients[slotItem.typeId]) {
+          ingredients[slotItem.typeId] -= slotItem.amount;
+          playerInventoryContainer.setItem(i, new ItemStack(ItemTypes.get("air"), 1));
         }
       }
     }

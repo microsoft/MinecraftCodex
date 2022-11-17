@@ -18,9 +18,9 @@ import {
   InventoryComponentContainer,
   BlockRecordPlayerComponent,
   ItemStack,
-} from "mojang-minecraft";
+} from "@minecraft/server";
 
-import { SimulatedPlayer } from "mojang-gametest";
+import { SimulatedPlayer } from "@minecraft/server-gametest";
 import CodexGame from "./CodexGame.js";
 import { game } from "./main.js";
 import Crafting from "./Crafting.js";
@@ -241,7 +241,7 @@ export class CodexBot {
     const block = game!.overWorld.getBlock(loc);
 
     // adding this check sped up the search by factor of 10
-    if (block.isEmpty) return;
+    if (block.typeId === "minecraft:air") return;
 
     if (block.type.id === coreBlockType) {
       blocks.push(block);
@@ -287,7 +287,7 @@ export class CodexBot {
 
     // is the block clear?
     for (let i = 0; i < 100; i++) {
-      if (overworld.getBlock(block.location).isEmpty) {
+      if (overworld.getBlock(block.location).typeId === "minecraft:air") {
         break;
       }
 
@@ -323,10 +323,11 @@ export class CodexBot {
   }
 
   async collectNearbyItems(): Promise<number> {
-    let eqo = new EntityQueryOptions();
-    eqo.type = "minecraft:item";
-    eqo.maxDistance = 10;
-    eqo.location = this.simBot.location;
+    let eqo = {
+      type: "minecraft:item",
+      maxDistance: 10,
+      location: this.simBot.location,
+    };
 
     let itemEntities = world.getDimension("overworld").getEntities(eqo);
     let locsToVisit: Location[] = [];
@@ -382,7 +383,7 @@ export class CodexBot {
     for (let i = 0; i < inventory.size; i++) {
       slotItem = inventory.getItem(i);
       if (slotItem != undefined) {
-        if (slotItem.id === fullName) {
+        if (slotItem.typeId === fullName) {
           //  this.chat("Found the item to drop!");
           slotLoc = i;
           let loc = this.simBot.location;
@@ -411,7 +412,7 @@ export class CodexBot {
     for (let i = 0; i < inventory.size; i++) {
       slotItem = inventory.getItem(i);
       if (slotItem != undefined) {
-        if (slotItem.id === fullName) {
+        if (slotItem.typeId === fullName) {
           // Create the permutation
           let torch = MinecraftBlockTypes.torch.createDefaultBlockPermutation();
           // Set the permutation
@@ -448,7 +449,7 @@ export class CodexBot {
     for (let i = 0; i < inventory.size; i++) {
       slotItem = inventory.getItem(i);
       if (slotItem != undefined) {
-        if (slotItem.id == itemName) {
+        if (slotItem.typeId == itemName) {
           let loc = this.simBot.location;
           let result = this.simBot.useItemInSlot(i);
           this.chat("Result is " + result);

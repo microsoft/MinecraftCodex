@@ -5,10 +5,6 @@
   "description": "Use codex to speak minecraft structures into existence",
   "private": true,
   "devDependencies": {
-    "@types/mojang-gametest": "^0.1.4",
-    "@types/mojang-minecraft": "^0.1.4",
-    "@types/mojang-minecraft-server-admin": "^0.1.0",
-    "@types/mojang-net": "^0.1.0",
     "del": "^6.0.0",
     "eslint": "^8.9.0",
     "gulp": "^4.0.2",
@@ -20,6 +16,10 @@
     "enablemcpreviewloopback": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-424268864-5579737-879501358-346833251-474568803-887069379-4040235476"
   },
   "dependencies": {
+    "@minecraft/server": "^1.0.0-beta.11940b24",
+    "@minecraft/server-admin": "^1.0.0-beta.11940b24",
+    "@minecraft/server-gametest": "^1.0.0-beta.11940b24",
+    "@minecraft/server-net": "^1.0.0-beta.11940b24",
     "gulp-sourcemaps": "^3.0.0"
   }
 }

@@ -5,7 +5,7 @@ import {
   BlockProperties,
   StringBlockProperty,
   BlockPermutation,
-} from "mojang-minecraft";
+} from "@minecraft/server";
 
 import { game } from "./main.js";
 

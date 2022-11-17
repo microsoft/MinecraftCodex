@@ -1,4 +1,4 @@
-import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "mojang-net";
+import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "@minecraft/server-net";
 import { OPENAI_API_KEY } from "./vars.js";
 
 export async function detectSensitiveContent(content: string): Promise<number> {

@@ -1,4 +1,4 @@
-import { MinecraftBlockTypes, Block } from "mojang-minecraft";
+import { MinecraftBlockTypes, Block } from "@minecraft/server";
 
 //test set blockType
 
