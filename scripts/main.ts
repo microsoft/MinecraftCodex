@@ -1,5 +1,5 @@
-import { world } from "mojang-minecraft";
-import * as GameTest from "mojang-gametest";
+import { world } from "@minecraft/server";
+import * as GameTest from "@minecraft/server-gametest";
 import CodexGame from "./CodexGame.js";
 
 let mainTickCount = 0;

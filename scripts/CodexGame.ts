@@ -12,14 +12,14 @@ import {
   InventoryComponentContainer,
   EntityInventoryComponent,
   ItemStack,
-} from "mojang-minecraft";
+} from "@minecraft/server";
 
 import { CodexBot } from "./CodexBot.js";
 import { BlockConverter, CodexBlockType } from "./BlockConverter.js";
 import Prompt from "./Prompt.js";
 import Model from "./Model.js";
 import { context } from "./prompts/combinedPrompt.js";
-import { SimulatedPlayer, Test } from "mojang-gametest";
+import { SimulatedPlayer, Test } from "@minecraft/server-gametest";
 import { GenGrow, BlockGen } from "./worldGrow/BoxGrow.js";
 import { TimedQueue } from "./TimedQueue.js";
 import { detectSensitiveContent } from "./ContentFilter.js";
@@ -96,7 +96,7 @@ export default class CodexGame {
     for (let i = 0; i < container.size; i++) {
       let slotItem = container.getItem(i);
       if (slotItem != undefined) {
-        let itemName = slotItem.id.substring(slotItem.id.indexOf(":") + 1, slotItem.id.length);
+        let itemName = slotItem.typeId.substring(slotItem.typeId.indexOf(":") + 1, slotItem.typeId.length);
         let numItems = slotItem.amount;
         haveItems = true;
 
@@ -149,7 +149,7 @@ export default class CodexGame {
     for (let i = 0; i < fromInventory.size; i++) {
       slotItem = fromInventory.getItem(i);
       if (slotItem != undefined) {
-        if (slotItem.id == itemName) {
+        if (slotItem.typeId == itemName) {
           fromSlot = i;
           i = fromInventory.size;
         }

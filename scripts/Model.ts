@@ -1,4 +1,4 @@
-import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "mojang-net";
+import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "@minecraft/server-net";
 import { game } from "./main.js";
 import { OPENAI_API_KEY, OPENAI_ENGINE_ID, OPENAI_ORGANIZATION_ID } from "./vars.js";
 
@@ -19,15 +19,17 @@ export default class Model {
       new HttpHeader("Content-Type", "application/json"),
       new HttpHeader("Accept", "application/json"),
       new HttpHeader("Authorization", `Bearer ${OPENAI_API_KEY}`),
-      new HttpHeader("OpenAI-Organization", OPENAI_ORGANIZATION_ID),
     ];
+
+    if (OPENAI_ORGANIZATION_ID && OPENAI_ENGINE_ID.length > 0) {
+      req.headers.push(new HttpHeader("OpenAI-Organization", OPENAI_ORGANIZATION_ID));
+    }
 
     // temperature is how creative Codex can get, you want to keep this at 0 for repeatable results in code
     // stop is the string that says "this is the end of the code", the structure of the prompts file uses it to denote the next command
     // max tokens is the number of "words" codex should return, 500 being a good number to get a complete response for code
     req.body = JSON.stringify({
       prompt: prompt,
-
       max_tokens: 500,
       temperature: 0,
       stop: "//",
@@ -41,8 +43,14 @@ export default class Model {
     console.log("response code: " + response);
 
     if (response.status >= 400) {
-      game?.bot.chat("Error response  " + response.status);
-      throw new Error(`${response.status} ${response.statusText}`);
+      let message = `Error from server: ${response.status}`;
+
+      if (response.statusText) {
+        message += " " + response.statusText;
+      }
+
+      game?.bot.chat(message);
+      throw new Error(message);
     }
 
     const resp = JSON.parse(response.body as any);
