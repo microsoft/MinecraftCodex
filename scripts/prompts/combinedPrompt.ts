@@ -38,10 +38,10 @@ await setTimeout(() => bot.stopMoving(), 500);
 bot.moveRelative(-1, 0, 1);
 await setTimeout(() => bot.stopMoving(), 2000);
 
-//jump
+// jump
 bot.jumpUp();
 
-//stop 
+// stop 
 bot.stopMoving();
 
 // collect nearby items 
@@ -71,7 +71,7 @@ state.followingInterval = setInterval(() => bot.followEntity(target, 0.7), 2000)
 // stop following me!
 clearInterval(state.followingInterval);
 
-//where are you?
+// where are you?
 let loc = bot.getLocation();
 bot.chat("I am at " + loc.x + ", " + loc.y + ", " + loc.z)
 
@@ -123,18 +123,18 @@ let inventory = game.listInventory(bot, "bot");
   },
 },
 
-//craft an oak_plank
+// craft an oak_plank
 bot.craftItem("plank");
 
 // can you craft an oak_plank
 bot.canCraftItem("plank");
 
-//find some grass
+// find some grass
 state.grassBlocks = bot.findBlock("grass", 16, 100);
 await bot.navigateLocation(state.grassBlocks);
 bot.chat("What should I do with the grass?")
 
-//mine two grass
+// mine two grass
 await bot.mineBlock(state.grassBlocks);
 await bot.mineBlock(state.grassBlocks);
 await bot.collectNearbyItems();
@@ -148,7 +148,7 @@ state.lookingInterval = setInterval(() => bot.lookAtEntity(target), 50);
 // u can stop
 clearInterval(state.lookingInterval);
 
-//go get me grass
+// go get me grass
 state.grassBlocks = bot.findBlock("grass", 16, 2);
 await bot.navigateLocation(state.grassBlocks);
 await bot.mineBlock(state.grassBlocks);
@@ -156,7 +156,7 @@ await.bot.mineBlock(state.grassBlocks);
 await bot.collectNearbyItems();
 bot.chat("I have mined and collected 2 grass");
 
-//get me the ingredients needed to build a chest
+// get me the ingredients needed to build a chest
 state.log = bot.findBlock("log", 16, 2);
 await bot.mineBlock(state.log);
 await bot.mineBlock(state.log);
@@ -169,7 +169,7 @@ bot.craftItem("planks");
 bot.craftItem("stick");
 bot.craftItem("wooden_sword");
 
-//find and open a chest
+// find and open a chest
 state.chest = bot.findBlock("chest", 16, 1);
 await bot.navigateLocation(state.chest);
 if(bot.interactBlock(state.chest)) bot.chat("I have opened the chest")
@@ -183,7 +183,7 @@ bot.navigateLocation(new Location(loc.x+2.5, loc.y, loc.z+2.5));
 if(bot.dropItem("log")) bot.chat("I have brought you the logs");
 
 
-//what items are needed to build planks?
-bot.chat("We need 1 log to build 4 planks);
+// what items are needed to build planks?
+bot.chat("We need 1 log to build 4 planks");
 `,
 };
