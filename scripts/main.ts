@@ -1,4 +1,4 @@
-import { world } from "@minecraft/server";
+import { system, world } from "@minecraft/server";
 import * as GameTest from "@minecraft/server-gametest";
 import CodexGame from "./CodexGame.js";
 
@@ -9,12 +9,17 @@ export let game: CodexGame | null = null;
 // main loop that drives the experience
 function tickMain() {
   mainTickCount++;
-  if (game) game.processTick();
 
-  // we need some arbitrary flag to say when the game should 'end' even though we never do
-  if (mainTickCount == 999999) {
-    gameEnd = true;
-  }
+  try {
+    if (game) game.processTick();
+
+    // we need some arbitrary flag to say when the game should 'end' even though we never do
+    if (mainTickCount == 999999) {
+      gameEnd = true;
+    }
+  } catch (e) {}
+
+  system.run(tickMain);
 }
 
 //register your game test start, which returns a GameTest object
@@ -24,7 +29,7 @@ GameTest.register("codex", "codex", (gameTest) => {
   const overworld = world.getDimension("overworld");
 
   //each tick is 50ms
-  world.events.tick.subscribe(tickMain);
+  system.run(tickMain);
 
   game = new CodexGame(gameTest);
 

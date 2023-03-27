@@ -1,5 +1,4 @@
 import {
-  BlockLocation,
   MinecraftBlockTypes,
   NavigationResult,
   BeforeChatEvent,
@@ -7,11 +6,12 @@ import {
   Player,
   Dimension,
   Vector,
-  Location,
   Block,
-  InventoryComponentContainer,
   EntityInventoryComponent,
   ItemStack,
+  Container,
+  BlockInventoryComponent,
+  Vector3,
 } from "@minecraft/server";
 
 import { CodexBot } from "./CodexBot.js";
@@ -69,15 +69,15 @@ export default class CodexGame {
     this.taskStack.processTick();
   }
 
-  getInventory(object: Block | SimulatedPlayer | Player): InventoryComponentContainer | undefined {
-    let container: InventoryComponentContainer | undefined = undefined;
+  getInventory(object: Block | SimulatedPlayer | Player): Container | undefined {
+    let container: Container | undefined = undefined;
 
     if (object instanceof SimulatedPlayer) {
       container = (object.getComponent("inventory") as EntityInventoryComponent).container;
     }
 
     if (object instanceof Block) {
-      container = object.getComponent("inventory").container;
+      container = (object.getComponent("inventory") as BlockInventoryComponent).container;
     }
 
     if (object instanceof Player) {
@@ -87,7 +87,7 @@ export default class CodexGame {
     return container;
   }
 
-  listInventory(object: Block | SimulatedPlayer | Player, name: string): InventoryComponentContainer | undefined {
+  listInventory(object: Block | SimulatedPlayer | Player, name: string): Container | undefined {
     let container = this.getInventory(object);
 
     if (!container) return undefined;
@@ -134,12 +134,7 @@ export default class CodexGame {
     return container;
   }
 
-  transferItem(
-    fromInventory: InventoryComponentContainer,
-    toInventory: InventoryComponentContainer,
-    name: string,
-    numItems: number = -1
-  ): boolean {
+  transferItem(fromInventory: Container, toInventory: Container, name: string, numItems: number = -1): boolean {
     let itemName = BlockConverter.ConvertBlockType(name).name;
     let slotItem: ItemStack;
     let fromSlot = -1;
@@ -165,15 +160,15 @@ export default class CodexGame {
     }
 
     if (toSlot != -1 && fromSlot != -1) {
-      let result = fromInventory.transferItem(fromSlot, toSlot, toInventory);
-      return result;
+      let result = fromInventory.transferItem(fromSlot, toInventory);
+      return true;
     }
     this.bot.chat("The item isn't there");
     return false;
   }
 
-  convertBlockLocToLoc(blockLoc: BlockLocation): Location {
-    return new Location(blockLoc.x, blockLoc.y, blockLoc.z);
+  convertBlockLocToLoc(blockLoc: Vector3): Vector3 {
+    return { x: blockLoc.x, y: blockLoc.y, z: blockLoc.z };
   }
 
   async pushGrowBlock(type: string, offsetX: number, offsetY: number, offsetZ: number) {
@@ -181,7 +176,7 @@ export default class CodexGame {
   }
 
   async growItem(location: Vector, offsetX: number, offsetY: number, offsetZ: number) {
-    this.genGrow.applyToOverworld(new BlockLocation(location.x + offsetX, location.y + offsetY, location.z + offsetZ));
+    this.genGrow.applyToOverworld({ x: location.x + offsetX, y: location.y + offsetY, z: location.z + offsetZ });
   }
 
   //check for the active player being set, and if hasn't been, then set it

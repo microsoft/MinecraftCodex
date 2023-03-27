@@ -93,9 +93,8 @@ export default class Crafting {
     }
     //console.warn("Giving player a " + recipe.result.item);
     let count = recipe.result.count ? recipe.result.count : 1;
-    let data = recipe.result.data ? recipe.result.data : 0;
 
-    playerInventoryContainer.addItem(new ItemStack(Items.get(recipe.result.item), count, data));
+    playerInventoryContainer.addItem(new ItemStack(Items.get(recipe.result.item), count));
     return "I made the " + recipeId + "!";
   }
 

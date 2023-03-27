@@ -1,11 +1,4 @@
-import {
-  MinecraftBlockTypes,
-  Block,
-  BlockType,
-  BlockProperties,
-  StringBlockProperty,
-  BlockPermutation,
-} from "@minecraft/server";
+import { MinecraftBlockTypes, Block, BlockType, BlockProperties, BlockPermutation } from "@minecraft/server";
 
 import { game } from "./main.js";
 
@@ -37,14 +30,12 @@ export class BlockConverter {
         case "spruce":
         case "birch":
         case "jungle":
-          blockConverter = MinecraftBlockTypes.log.createDefaultBlockPermutation();
-          (blockConverter.getProperty(BlockProperties.oldLogType) as StringBlockProperty).value = material;
+          blockConverter = BlockPermutation.resolve("minecraft:log", { old_log_type: material });
           break;
 
         case "acacia":
         case "dark_oak":
-          blockConverter = MinecraftBlockTypes.log.createDefaultBlockPermutation();
-          (blockConverter.getProperty(BlockProperties.oldLogType) as StringBlockProperty).value = material;
+          blockConverter = BlockPermutation.resolve("minecraft:log2", { new_log_type: material });
           break;
       }
     }
@@ -63,8 +54,7 @@ export class BlockConverter {
         case "jungle":
         case "acacia":
         case "dark_oak":
-          blockConverter = MinecraftBlockTypes.wood.createDefaultBlockPermutation();
-          (blockConverter.getProperty(BlockProperties.woodType) as StringBlockProperty).value = material;
+          blockConverter = BlockPermutation.resolve("minecraft:wood", { wood_type: material });
           break;
       }
     }
@@ -77,8 +67,7 @@ export class BlockConverter {
       switch (material) {
         case "coarse":
         case "normal":
-          blockConverter = MinecraftBlockTypes.dirt.createDefaultBlockPermutation();
-          (blockConverter.getProperty(BlockProperties.dirtType) as StringBlockProperty).value = material;
+          blockConverter = BlockPermutation.resolve("minecraft:dirt", { dirt_type: material });
           break;
       }
     }
@@ -94,8 +83,7 @@ export class BlockConverter {
         case "jungle":
         case "acacia":
         case "roofed_oak":
-          blockConverter = MinecraftBlockTypes.sapling.createDefaultBlockPermutation();
-          (blockConverter.getProperty(BlockProperties.saplingType) as StringBlockProperty).value = material;
+          blockConverter = BlockPermutation.resolve("minecraft:sapling", { sapling_type: material });
           break;
       }
     }
@@ -113,8 +101,7 @@ export class BlockConverter {
         case "diorite_smooth":
         case "andesite":
         case "andesite_smooth":
-          blockConverter = MinecraftBlockTypes.stone.createDefaultBlockPermutation();
-          (blockConverter.getProperty(BlockProperties.stoneType) as StringBlockProperty).value = material;
+          blockConverter = BlockPermutation.resolve("minecraft:stone", { stone_type: material });
           break;
       }
     }
