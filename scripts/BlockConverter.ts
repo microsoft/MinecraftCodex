@@ -1,4 +1,4 @@
-import { MinecraftBlockTypes, Block, BlockType, BlockProperties, BlockPermutation } from "@minecraft/server";
+import { Block, BlockType, BlockStates, BlockPermutation } from "@minecraft/server";
 
 import { game } from "./main.js";
 

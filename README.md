@@ -10,9 +10,9 @@ Please read the readme carefully to make sure you get the right bits. This repo 
 
 - An [OpenAI account](https://openai.com/api/)
 
-  - [OpenAI API Key](https://beta.openai.com/account/api-keys).
-  - [OpenAI Organization Id](https://beta.openai.com/account/org-settings). If you have multiple organizations, please update your [default organization](https://beta.openai.com/account/api-keys) to the one that has access to codex engines before getting the organization Id.
-  - [OpenAI Engine Id](https://beta.openai.com/docs/engines/codex-series-private-beta). The name of the Codex model you're using. This repository was primarily tested using `code-davinci-002`. See [here](#what-openai-engines-are-available-to-me) for checking available engines.
+  - [OpenAI API Key](https://platform.openai.com/account/api-keys).
+  - [OpenAI Organization Id](https://platform.openai.com/account/org-settings). If you have multiple organizations, please update your [default organization](https://platform.openai.com/account/api-keys) to the one that has access to codex engines before getting the organization Id.
+  - [OpenAI Model Id](https://platform.openai.com/docs/engines/codex-series-private-beta). The name of the Codex model you're using. This repository was primarily tested using `code-davinci-002`. (update, September 2023: code-davinci-002 does not appear available; consider using `text-davinci-002` instead.) See [here](#what-openai-engines-are-available-to-me) for checking available engines.
 
 - You need to be an owner of Minecraft, or have PC GamePass, in order to use Minecraft or Minecraft Preview.
   - This sample uses a separate Dedicated Server and a Minecraft client app. For more information on Minecraft Bedrock Edition, Dedicated Server and how you can use scripting with them, see [this article](https://docs.microsoft.com/minecraft/creator/documents/scriptingservers).
@@ -211,7 +211,7 @@ If you don't see the console trying to autocomplete to your test, then you have 
 
 ### What OpenAI engines are available to me?
 
-You might have access to different [OpenAI engines](https://beta.openai.com/docs/api-reference/engines) per OpenAI organization. To check what engines are available to you, one can query the [List engines API](https://beta.openai.com/docs/api-reference/engines/list) for available engines. See the following commands:
+You might have access to different [OpenAI engines](https://platform.openai.com/docs/api-reference/engines) per OpenAI organization. To check what engines are available to you, one can query the [List engines API](https://platform.openai.com/docs/api-reference/engines/list) for available engines. See the following commands:
 
 - Shell
   ```

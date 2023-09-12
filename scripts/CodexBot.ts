@@ -5,10 +5,9 @@ import {
   BlockRaycastOptions,
   Entity,
   Player,
-  MinecraftBlockTypes,
   Block,
   BlockType,
-  BlockProperties,
+  BlockStates,
   BlockPermutation,
   EntityQueryOptions,
   EntityInventoryComponent,
@@ -235,7 +234,7 @@ export class CodexBot {
     const block = game!.overWorld.getBlock(loc);
 
     // adding this check sped up the search by factor of 10
-    if (block.typeId === "minecraft:air") return;
+    if (!block || block.typeId === "minecraft:air") return;
 
     if (block.type.id === coreBlockType) {
       blocks.push(block);
@@ -281,7 +280,8 @@ export class CodexBot {
 
     // is the block clear?
     for (let i = 0; i < 100; i++) {
-      if (overworld.getBlock(block.location).typeId === "minecraft:air") {
+      const blockInstance = overworld.getBlock(block.location);
+      if (blockInstance && blockInstance.typeId === "minecraft:air") {
         break;
       }
 
@@ -366,7 +366,7 @@ export class CodexBot {
 
   dropItem(name: string): boolean {
     let inventory = this.codexGame.getInventory(this.simBot);
-    let slotItem: ItemStack | null = null;
+    let slotItem: ItemStack | undefined = undefined;
     let slotLoc = 0;
 
     if (!inventory) return false;
@@ -392,7 +392,7 @@ export class CodexBot {
 
   placeItem(name: string): boolean {
     let inventory = this.codexGame.getInventory(this.simBot);
-    let slotItem: ItemStack | null = null;
+    let slotItem: ItemStack | undefined = undefined;
 
     if (!inventory) return false;
 
@@ -401,17 +401,19 @@ export class CodexBot {
 
     if (!game) return false;
 
-    let block: Block = game.overWorld.getBlock(loc);
+    let block: Block | undefined = game.overWorld.getBlock(loc);
 
-    for (let i = 0; i < inventory.size; i++) {
-      slotItem = inventory.getItem(i);
-      if (slotItem != undefined) {
-        if (slotItem.typeId === fullName) {
-          // Create the permutation
-          let torch = BlockPermutation.resolve("minecraft:torch");
-          // Set the permutation
-          block.setPermutation(torch);
-          return true;
+    if (block) {
+      for (let i = 0; i < inventory.size; i++) {
+        slotItem = inventory.getItem(i);
+        if (slotItem != undefined) {
+          if (slotItem.typeId === fullName) {
+            // Create the permutation
+            let torch = BlockPermutation.resolve("minecraft:torch");
+            // Set the permutation
+            block.setPermutation(torch);
+            return true;
+          }
         }
       }
     }
@@ -426,7 +428,7 @@ export class CodexBot {
 
   equipItem(name: string) {
     let itemName = BlockConverter.ConvertBlockType(name).name;
-    let slotItem: ItemStack;
+    let slotItem: ItemStack | undefined;
     itemName = "minecraft:" + itemName;
     let inventory = this.simBot.inventory;
     let slotLoc = 0;

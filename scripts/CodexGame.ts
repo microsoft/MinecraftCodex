@@ -1,7 +1,6 @@
 import {
-  MinecraftBlockTypes,
   NavigationResult,
-  BeforeChatEvent,
+  ChatSendAfterEvent,
   world,
   Player,
   Dimension,
@@ -12,6 +11,7 @@ import {
   Container,
   BlockInventoryComponent,
   Vector3,
+  BlockTypes,
 } from "@minecraft/server";
 
 import { CodexBot } from "./CodexBot.js";
@@ -59,7 +59,7 @@ export default class CodexGame {
     // Spawn a new CodexBot instance, which wraps SimulatedPlayer, next to the main player
     this.bot = new CodexBot(this);
 
-    world.events.beforeChat.subscribe((chat: BeforeChatEvent) => {
+    world.afterEvents.chatSend.subscribe((chat: ChatSendAfterEvent) => {
       this.processMessage(chat);
     });
   }
@@ -136,7 +136,7 @@ export default class CodexGame {
 
   transferItem(fromInventory: Container, toInventory: Container, name: string, numItems: number = -1): boolean {
     let itemName = BlockConverter.ConvertBlockType(name).name;
-    let slotItem: ItemStack;
+    let slotItem: ItemStack | undefined;
     let fromSlot = -1;
     let toSlot = -1;
     itemName = "minecraft:" + itemName;
@@ -172,7 +172,11 @@ export default class CodexGame {
   }
 
   async pushGrowBlock(type: string, offsetX: number, offsetY: number, offsetZ: number) {
-    this.genGrow.addBlock(MinecraftBlockTypes.get("minecraft:" + type), new Vector(offsetX, offsetY, offsetZ));
+    let blockType = BlockTypes.get("minecraft:" + type);
+
+    if (blockType) {
+      this.genGrow.addBlock(blockType, new Vector(offsetX, offsetY, offsetZ));
+    }
   }
 
   async growItem(location: Vector, offsetX: number, offsetY: number, offsetZ: number) {
@@ -203,7 +207,7 @@ export default class CodexGame {
   }
 
   // Event subscriptions
-  async processMessage(chat: BeforeChatEvent) {
+  async processMessage(chat: ChatSendAfterEvent) {
     let username = chat.sender.name;
     const message = chat.message;
     const lcMessage = chat.message.toLowerCase();

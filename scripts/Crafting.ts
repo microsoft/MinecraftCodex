@@ -1,4 +1,4 @@
-import { Player, EntityInventoryComponent, ItemStack, Items, MinecraftItemTypes, ItemTypes } from "@minecraft/server";
+import { Player, EntityInventoryComponent, ItemStack, ItemTypes } from "@minecraft/server";
 import IRecipe from "./IRecipe.js";
 
 export default class Crafting {
@@ -83,19 +83,31 @@ export default class Crafting {
           playerInventoryContainer.setItem(i, slotItem);
           ingredients[slotItem.typeId] = 0;
         } else if (slotItem.amount == ingredients[slotItem.typeId]) {
-          playerInventoryContainer.setItem(i, new ItemStack(ItemTypes.get("air"), 1));
-          ingredients[slotItem.typeId] = 0;
+          const air = ItemTypes.get("air");
+          if (air) {
+            playerInventoryContainer.setItem(i, new ItemStack(air, 1));
+            ingredients[slotItem.typeId] = 0;
+          }
         } else if (slotItem.amount < ingredients[slotItem.typeId]) {
-          ingredients[slotItem.typeId] -= slotItem.amount;
-          playerInventoryContainer.setItem(i, new ItemStack(ItemTypes.get("air"), 1));
+          const air = ItemTypes.get("air");
+          if (air) {
+            ingredients[slotItem.typeId] -= slotItem.amount;
+            playerInventoryContainer.setItem(i, new ItemStack(air, 1));
+          }
         }
       }
     }
     //console.warn("Giving player a " + recipe.result.item);
     let count = recipe.result.count ? recipe.result.count : 1;
 
-    playerInventoryContainer.addItem(new ItemStack(Items.get(recipe.result.item), count));
-    return "I made the " + recipeId + "!";
+    let itemType = ItemTypes.get(recipe.result.item);
+
+    if (itemType) {
+      playerInventoryContainer.addItem(new ItemStack(itemType, count));
+      return "I made the " + recipeId + "!";
+    } else {
+      return "I couldn't find a " + recipe.result.item + " to craft.";
+    }
   }
 
   static getFlatIngredientList(recipe: IRecipe) {
