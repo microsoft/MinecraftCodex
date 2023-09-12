@@ -1,15 +1,15 @@
-import { Block, BlockLocation, MinecraftBlockTypes, Vector, world } from "@minecraft/server";
+import { Block, BlockTypes, BlockType, Vector, Vector3, world } from "@minecraft/server";
 import BlockBounds from "./BlockBounds.js";
 import BlockMutate from "./BlockGrow.js";
 
 export const MAX_TIME_CONSUMPTION_MS = 10;
 
 export class BlockGen {
-  blockType: MinecraftBlockTypes;
+  blockType: BlockType;
   blockMutator: BlockMutate;
   offset: Vector;
 
-  constructor(blockType: MinecraftBlockTypes, offset: Vector) {
+  constructor(blockType: BlockType, offset: Vector) {
     this.blockType = blockType;
     this.blockMutator = new BlockMutate(blockType);
     this.offset = offset;
@@ -19,11 +19,11 @@ export class BlockGen {
 export class GenGrow {
   blocksToGrow: BlockGen[] = [];
 
-  addBlock(blockType: MinecraftBlockTypes, offset: Vector) {
+  addBlock(blockType: BlockType, offset: Vector) {
     this.blocksToGrow.push(new BlockGen(blockType, offset));
   }
 
-  applyToOverworld(location: BlockLocation) {
+  applyToOverworld(location: Vector3) {
     const overworld = world.getDimension("overworld");
     let posX = location.x;
     let posY = location.y;
@@ -32,9 +32,12 @@ export class GenGrow {
 
     for (let growBlock of this.blocksToGrow) {
       let offset = growBlock.offset;
-      let worldBlock = overworld.getBlock(new BlockLocation(posX + offset.x, posY + offset.y, posZ + offset.z));
-      growBlock.blockMutator.mutateWorldBlock(worldBlock);
-      blocksApplied++;
+      let worldBlock = overworld.getBlock({ x: posX + offset.x, y: posY + offset.y, z: posZ + offset.z });
+
+      if (worldBlock) {
+        growBlock.blockMutator.mutateWorldBlock(worldBlock);
+        blocksApplied++;
+      }
     }
     this.blocksToGrow.length = 0;
     return blocksApplied;
@@ -43,10 +46,10 @@ export class GenGrow {
 
 class BoxGrow {
   boxSize: BlockBounds;
-  blockType: MinecraftBlockTypes;
+  blockType: BlockType;
   blockMutator: BlockMutate;
 
-  constructor(size: BlockBounds, blockType: MinecraftBlockTypes) {
+  constructor(size: BlockBounds, blockType: BlockType) {
     this.boxSize = size;
     this.blockType = blockType;
     this.blockMutator = new BlockMutate(blockType);
@@ -64,7 +67,7 @@ class BoxGrow {
     }
   }
 
-  applyToOverworld(location: BlockLocation) {
+  applyToOverworld(location: Vector3) {
     const overworld = world.getDimension("overworld");
     let sX = location.x;
     let sY = location.y;
@@ -74,9 +77,12 @@ class BoxGrow {
     for (let iX = 0; iX < this.boxSize.x; iX++) {
       for (let iY = 0; iY < this.boxSize.y; iY++) {
         for (let iZ = 0; iZ < this.boxSize.z; iZ++) {
-          let worldBlock = overworld.getBlock(new BlockLocation(sX + iX, sY + iY, sZ + iZ));
-          this.blockMutator.mutateWorldBlock(worldBlock);
-          blocksApplied++;
+          let worldBlock = overworld.getBlock({ x: sX + iX, y: sY + iY, z: sZ + iZ });
+
+          if (worldBlock) {
+            this.blockMutator.mutateWorldBlock(worldBlock);
+            blocksApplied++;
+          }
         }
       }
     }

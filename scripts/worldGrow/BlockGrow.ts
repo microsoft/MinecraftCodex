@@ -1,4 +1,4 @@
-import { MinecraftBlockTypes, Block } from "@minecraft/server";
+import { BlockType, BlockTypes, Block } from "@minecraft/server";
 
 //test set blockType
 
@@ -10,9 +10,9 @@ import { MinecraftBlockTypes, Block } from "@minecraft/server";
             // Set the permutation
             block.setPermutation(bottomStoneSlab);*/
 export default class BlockMutate {
-  typeId: MinecraftBlockTypes;
+  typeId: BlockType;
 
-  constructor(type: MinecraftBlockTypes) {
+  constructor(type: BlockType) {
     this.typeId = type;
   }
 
@@ -23,7 +23,7 @@ export default class BlockMutate {
   //change any block in the world, including empty air blocks, into whatever type you want
   mutateWorldBlock(block: Block) {
     if (this.typeId) {
-      let sourceType = MinecraftBlockTypes.get("minecraft:" + this.typeId);
+      let sourceType = BlockTypes.get("minecraft:" + this.typeId);
       if (!sourceType) {
         console.log("Could not find type id " + this.typeId);
         return false;

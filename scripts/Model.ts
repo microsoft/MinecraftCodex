@@ -1,6 +1,6 @@
 import { http, HttpRequest, HttpRequestMethod, HttpHeader } from "@minecraft/server-net";
 import { game } from "./main.js";
-import { OPENAI_API_KEY, OPENAI_ENGINE_ID, OPENAI_ORGANIZATION_ID } from "./vars.js";
+import { OPENAI_API_KEY, OPENAI_MODEL_ID, OPENAI_ENGINE_ID, OPENAI_ORGANIZATION_ID } from "./vars.js";
 
 // Model Class
 
@@ -13,34 +13,41 @@ export default class Model {
 
   // send the text we typed into Minecraft to OpenAI to get the code for the bot to run
   async getCompletion(prompt: string) {
-    const req = new HttpRequest(`https://api.openai.com/v1/engines/${OPENAI_ENGINE_ID}/completions`);
+    const req = OPENAI_ENGINE_ID
+      ? new HttpRequest(`https://api.openai.com/v1/engines/${OPENAI_ENGINE_ID}/completions`)
+      : new HttpRequest(`https://api.openai.com/v1/completions`);
 
-    req.headers = [
+    const headers = [
       new HttpHeader("Content-Type", "application/json"),
       new HttpHeader("Accept", "application/json"),
       new HttpHeader("Authorization", `Bearer ${OPENAI_API_KEY}`),
     ];
 
-    if (OPENAI_ORGANIZATION_ID && OPENAI_ENGINE_ID.length > 0) {
-      req.headers.push(new HttpHeader("OpenAI-Organization", OPENAI_ORGANIZATION_ID));
+    if (OPENAI_ORGANIZATION_ID) {
+      headers.push(new HttpHeader("OpenAI-Organization", OPENAI_ORGANIZATION_ID));
     }
+
+    req.setHeaders(headers);
 
     // temperature is how creative Codex can get, you want to keep this at 0 for repeatable results in code
     // stop is the string that says "this is the end of the code", the structure of the prompts file uses it to denote the next command
     // max tokens is the number of "words" codex should return, 500 being a good number to get a complete response for code
-    req.body = JSON.stringify({
-      prompt: prompt,
-      max_tokens: 500,
-      temperature: 0,
-      stop: "//",
-      n: 1,
-    });
+    req.setBody(
+      JSON.stringify({
+        prompt: prompt,
+        max_tokens: 500,
+        temperature: 0,
+        stop: "//",
+        n: 1,
+        model: OPENAI_MODEL_ID,
+      })
+    );
 
-    req.method = HttpRequestMethod.POST;
+    req.setMethod(HttpRequestMethod.Post);
 
     const response: any = await http.request(req);
 
-    console.log("response code: " + response);
+    console.log("response body: " + response.body);
 
     if (response.status >= 400) {
       let message = `Error from server: ${response.status}`;

@@ -1,23 +1,20 @@
 import { DEBUG } from "./vars.js";
 import {
   world,
-  BlockLocation,
-  Location,
   Vector,
   BlockRaycastOptions,
   Entity,
   Player,
-  MinecraftBlockTypes,
   Block,
   BlockType,
-  BlockProperties,
-  StringBlockProperty,
+  BlockStates,
   BlockPermutation,
   EntityQueryOptions,
   EntityInventoryComponent,
-  InventoryComponentContainer,
   BlockRecordPlayerComponent,
   ItemStack,
+  Vector3,
+  Container,
 } from "@minecraft/server";
 
 import { SimulatedPlayer } from "@minecraft/server-gametest";
@@ -31,8 +28,8 @@ export interface Bot extends SimulatedPlayer {
 
   jumpUp: () => Promise<void>;
 
-  getLocation: () => BlockLocation;
-  navigateLocation: (worldLocation: Location | Block[], speed?: number) => Promise<void>;
+  getLocation: () => Vector3;
+  navigateLocation: (worldLocation: Vector3 | Block[], speed?: number) => Promise<void>;
   followEntity: (player: Entity, speed?: number) => Promise<void>;
 
   findBlock: (type: string, maxRadius: number) => Block[];
@@ -46,15 +43,10 @@ export interface Bot extends SimulatedPlayer {
   placeItem: (name: string) => boolean;
   collectNearbyItems: () => Promise<number>;
   equipItem: (name: string) => boolean;
-  transferItem: (
-    fromInventory: InventoryComponentContainer,
-    toInventory: InventoryComponentContainer,
-    name: string,
-    numItems: number
-  ) => boolean;
+  transferItem: (fromInventory: Container, toInventory: Container, name: string, numItems: number) => boolean;
 
-  inventory?: InventoryComponentContainer;
-  targetInventory?: InventoryComponentContainer;
+  inventory?: Container;
+  targetInventory?: Container;
 }
 
 export class CodexBot {
@@ -71,7 +63,7 @@ export class CodexBot {
 
     this.name = this.players[0].name;
 
-    this.simBot = thisGame.gameTest.spawnSimulatedPlayer(new BlockLocation(5, 0, 0), "CodexBot") as Bot;
+    this.simBot = thisGame.gameTest.spawnSimulatedPlayer({ x: 5, y: 0, z: 0 }, "CodexBot") as Bot;
     this.simBot.chat = this.chat.bind(this);
 
     this.simBot.jumpUp = this.jumpUp.bind(this);
@@ -107,51 +99,52 @@ export class CodexBot {
     await this.codexGame.taskStack.sleep(400);
   }
 
-  getLocation(): BlockLocation {
-    return new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
+  getLocation(): Vector3 {
+    return { x: this.simBot.location.x, y: this.simBot.location.y, z: this.simBot.location.z };
   }
 
-  async navigateLocation(worldLocation: Location | Block[], speed?: number) {
+  async navigateLocation(worldLocation: Vector3 | Block[], speed?: number) {
     if (!speed) {
       speed = 1;
     }
-    let dest: Location = new Location(0, 0, 0);
+    let dest: Vector3 = { x: 0, y: 0, z: 0 };
     let blockArr: Block[] | undefined = undefined;
 
-    if (worldLocation instanceof Location) dest = worldLocation;
-    else {
+    if (!Array.isArray(worldLocation)) {
+      dest = worldLocation as Vector3;
+    } else {
       {
         blockArr = worldLocation as Block[];
         if (blockArr.length == 0) {
           this.chat("There is nowhere to go");
           return;
         }
-        dest = new Location(blockArr[0].location.x, blockArr[0].location.y, blockArr[0].location.z);
+        dest = { x: blockArr[0].location.x, y: blockArr[0].location.y, z: blockArr[0].location.z };
       }
     }
 
     let botLoc = this.getLocation();
-    let vector = new Location(dest.x - botLoc.x, dest.y - botLoc.y, dest.z - botLoc.z);
+    let vector = { x: dest.x - botLoc.x, y: dest.y - botLoc.y, z: dest.z - botLoc.z };
     let length = Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
-    let unitVec = new Location(vector.x / length, vector.y / length, vector.z / length);
+    let unitVec = { x: vector.x / length, y: vector.y / length, z: vector.z / length };
 
     //magic number math
     let numPts = Math.ceil(length) + 1;
     numPts = Math.ceil(numPts / 2);
 
-    let locations: Location[] = [];
+    let locations: Vector3[] = [];
 
     for (let i = 0; i < numPts; i++) {
-      let point = new BlockLocation(botLoc.x + i * unitVec.x, botLoc.y + i * unitVec.y, botLoc.z + i * unitVec.z);
+      let point = { x: botLoc.x + i * unitVec.x, y: botLoc.y + i * unitVec.y, z: botLoc.z + i * unitVec.z };
       let newPt = this.codexGame.gameTest.relativeBlockLocation(point);
-      locations.push(new Location(newPt.x, newPt.y, newPt.z));
+      locations.push({ x: newPt.x, y: newPt.y, z: newPt.z });
     }
-    let lastBlockLoc = new BlockLocation(dest.x, dest.y, dest.z);
+    let lastBlockLoc = { x: dest.x, y: dest.y, z: dest.z };
     let lastLoc = this.codexGame.gameTest.relativeBlockLocation(lastBlockLoc);
 
-    let endOffset = new Location(0, 0, 0);
+    let endOffset = { x: 0, y: 0, z: 0 };
 
-    locations.push(new Location(lastLoc.x - endOffset.x, lastLoc.y, lastLoc.z - endOffset.z));
+    locations.push({ x: lastLoc.x - endOffset.x, y: lastLoc.y, z: lastLoc.z - endOffset.z });
 
     // this.chat("Navigating to block " + numPts + " blocks long.");
     try {
@@ -172,8 +165,8 @@ export class CodexBot {
   }
 
   async followEntity(player: Entity, speed: number = 0.7) {
-    let botBlockLoc = new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
-    let playerBlockLoc = new BlockLocation(player.location.x, player.location.y, player.location.z);
+    let botBlockLoc = { x: this.simBot.location.x, y: this.simBot.location.y, z: this.simBot.location.z };
+    let playerBlockLoc = { x: player.location.x, y: player.location.y, z: player.location.z };
     let distance = this.getBlockDistance(botBlockLoc, playerBlockLoc);
 
     this.simBot.navigateToEntity(player, speed);
@@ -184,7 +177,7 @@ export class CodexBot {
   // adapted from https://stackoverflow.com/questions/37214057/3d-array-traversal-originating-from-center
   findBlock(type: string, maxRadius: number = 16, numFind: number = 1): Block[] {
     let diameter = maxRadius * 2;
-    const start = new BlockLocation(this.simBot.location.x, this.simBot.location.y, this.simBot.location.z);
+    const start = { x: this.simBot.location.x, y: this.simBot.location.y, z: this.simBot.location.z };
     let blocks: Block[] = [];
 
     if (!game || !game.overWorld) {
@@ -217,7 +210,7 @@ export class CodexBot {
     return blocks;
   }
 
-  mirrorEven(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
+  mirrorEven(x: number, y: number, z: number, start: Vector3, blocks: Block[], coreBlockType: string) {
     for (var i = 1; i >= 0; --i, x *= -1) {
       for (var j = 1; j >= 0; --j, y *= -1) {
         for (var k = 1; k >= 0; --k, z *= -1) {
@@ -227,7 +220,7 @@ export class CodexBot {
     }
   }
 
-  mirrorOdd(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
+  mirrorOdd(x: number, y: number, z: number, start: Vector3, blocks: Block[], coreBlockType: string) {
     for (var i = 0; i < (x ? 2 : 1); ++i, x *= -1) {
       for (var j = 0; j < (y ? 2 : 1); ++j, y *= -1) {
         for (var k = 0; k < (z ? 2 : 1); ++k, z *= -1) {
@@ -236,12 +229,12 @@ export class CodexBot {
       }
     }
   }
-  checkBlock(x: number, y: number, z: number, start: BlockLocation, blocks: Block[], coreBlockType: string) {
-    const loc = new BlockLocation(start.x + x, start.y + y, start.z + z);
+  checkBlock(x: number, y: number, z: number, start: Vector3, blocks: Block[], coreBlockType: string) {
+    const loc = { x: start.x + x, y: start.y + y, z: start.z + z };
     const block = game!.overWorld.getBlock(loc);
 
     // adding this check sped up the search by factor of 10
-    if (block.typeId === "minecraft:air") return;
+    if (!block || block.typeId === "minecraft:air") return;
 
     if (block.type.id === coreBlockType) {
       blocks.push(block);
@@ -249,7 +242,7 @@ export class CodexBot {
   }
 
   async mineBlock(blockArr: Block[]): Promise<boolean> {
-    let botHeadLoc = this.simBot.headLocation;
+    let botHeadLoc = this.simBot.getHeadLocation();
     let botLoc = this.simBot.location;
 
     if (blockArr === undefined || blockArr.length === 0) {
@@ -275,7 +268,7 @@ export class CodexBot {
     }
 
     // go towards the block we are trying to mine
-    await this.navigateLocation(new Location(blockLoc.x, blockLoc.y, blockLoc.z), 0.7);
+    await this.navigateLocation({ x: blockLoc.x, y: blockLoc.y, z: blockLoc.z }, 0.7);
 
     // make sure the bot is looking at what it is mining
     this.lookBlock(blockLoc);
@@ -287,7 +280,8 @@ export class CodexBot {
 
     // is the block clear?
     for (let i = 0; i < 100; i++) {
-      if (overworld.getBlock(block.location).typeId === "minecraft:air") {
+      const blockInstance = overworld.getBlock(block.location);
+      if (blockInstance && blockInstance.typeId === "minecraft:air") {
         break;
       }
 
@@ -300,7 +294,7 @@ export class CodexBot {
     return result;
   }
 
-  lookBlock(blockLoc: BlockLocation) {
+  lookBlock(blockLoc: Vector3) {
     let relBlockLoc = this.codexGame.gameTest.relativeBlockLocation(blockLoc);
     // make sure the bot is facing the block
     this.simBot.lookAtBlock(relBlockLoc);
@@ -330,7 +324,7 @@ export class CodexBot {
     };
 
     let itemEntities = world.getDimension("overworld").getEntities(eqo);
-    let locsToVisit: Location[] = [];
+    let locsToVisit: Vector3[] = [];
 
     for (let itemEntity of itemEntities) {
       locsToVisit.push(this.codexGame.gameTest.relativeLocation(itemEntity.location));
@@ -359,7 +353,7 @@ export class CodexBot {
     let distance = this.getRouteLength(locsToVisit);
 
     let lastLoc = locsToVisit[locsToVisit.length - 1];
-    let blockLastLoc = new BlockLocation(lastLoc.x, lastLoc.y, lastLoc.z);
+    let blockLastLoc = { x: lastLoc.x, y: lastLoc.y, z: lastLoc.z };
 
     do {
       await this.codexGame.taskStack.sleep(locsToVisit.length * 500);
@@ -372,7 +366,7 @@ export class CodexBot {
 
   dropItem(name: string): boolean {
     let inventory = this.codexGame.getInventory(this.simBot);
-    let slotItem: ItemStack | null = null;
+    let slotItem: ItemStack | undefined = undefined;
     let slotLoc = 0;
 
     if (!inventory) return false;
@@ -387,7 +381,7 @@ export class CodexBot {
           //  this.chat("Found the item to drop!");
           slotLoc = i;
           let loc = this.simBot.location;
-          let result = this.simBot.useItemInSlotOnBlock(slotLoc, new BlockLocation(loc.x + 1, loc.y, loc.z + 1));
+          let result = this.simBot.useItemInSlotOnBlock(slotLoc, { x: loc.x + 1, y: loc.y, z: loc.z + 1 });
           // this.chat("Result is " + result);
           return result;
         }
@@ -398,7 +392,7 @@ export class CodexBot {
 
   placeItem(name: string): boolean {
     let inventory = this.codexGame.getInventory(this.simBot);
-    let slotItem: ItemStack | null = null;
+    let slotItem: ItemStack | undefined = undefined;
 
     if (!inventory) return false;
 
@@ -407,17 +401,19 @@ export class CodexBot {
 
     if (!game) return false;
 
-    let block: Block = game.overWorld.getBlock(loc);
+    let block: Block | undefined = game.overWorld.getBlock(loc);
 
-    for (let i = 0; i < inventory.size; i++) {
-      slotItem = inventory.getItem(i);
-      if (slotItem != undefined) {
-        if (slotItem.typeId === fullName) {
-          // Create the permutation
-          let torch = MinecraftBlockTypes.torch.createDefaultBlockPermutation();
-          // Set the permutation
-          block.setPermutation(torch);
-          return true;
+    if (block) {
+      for (let i = 0; i < inventory.size; i++) {
+        slotItem = inventory.getItem(i);
+        if (slotItem != undefined) {
+          if (slotItem.typeId === fullName) {
+            // Create the permutation
+            let torch = BlockPermutation.resolve("minecraft:torch");
+            // Set the permutation
+            block.setPermutation(torch);
+            return true;
+          }
         }
       }
     }
@@ -425,19 +421,14 @@ export class CodexBot {
     return false;
   }
 
-  transferItem(
-    fromInventory: InventoryComponentContainer,
-    toInventory: InventoryComponentContainer,
-    name: string,
-    numItems: number
-  ): boolean {
+  transferItem(fromInventory: Container, toInventory: Container, name: string, numItems: number): boolean {
     if (!game) return false;
     return game?.transferItem(fromInventory, toInventory, name, numItems);
   }
 
   equipItem(name: string) {
     let itemName = BlockConverter.ConvertBlockType(name).name;
-    let slotItem: ItemStack;
+    let slotItem: ItemStack | undefined;
     itemName = "minecraft:" + itemName;
     let inventory = this.simBot.inventory;
     let slotLoc = 0;
@@ -488,7 +479,7 @@ export class CodexBot {
     }
   }
 
-  getRouteLength(locations: Location[]) {
+  getRouteLength(locations: Vector3[]) {
     var totalLength = 0;
 
     for (let i = 1; i < locations.length; i++) {
@@ -498,13 +489,13 @@ export class CodexBot {
     return totalLength;
   }
 
-  getDistance(start: Location, end: Location): number {
+  getDistance(start: Vector3, end: Vector3): number {
     let vector = new Vector(start.x - end.x, start.y - end.y, start.z - end.z);
 
     return Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);
   }
 
-  getBlockDistance(start: BlockLocation, end: BlockLocation): number {
+  getBlockDistance(start: Vector3, end: Vector3): number {
     let vector = new Vector(start.x - end.x, start.y - end.y, start.z - end.z);
 
     return Math.sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z);

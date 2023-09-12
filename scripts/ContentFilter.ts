@@ -4,20 +4,22 @@ import { OPENAI_API_KEY } from "./vars.js";
 export async function detectSensitiveContent(content: string): Promise<number> {
   const req = new HttpRequest("https://api.openai.com/v1/engines/content-filter-alpha/completions");
 
-  req.headers = [
+  req.setHeaders([
     new HttpHeader("Content-Type", "application/json"),
     new HttpHeader("Accept", "application/json"),
     new HttpHeader("Authorization", `Bearer ${OPENAI_API_KEY}`),
-  ];
+  ]);
 
-  req.method = HttpRequestMethod.POST;
-  req.body = JSON.stringify({
-    prompt: `<|endoftext|>[${content}]\n--\nLabel:`,
-    temperature: 0,
-    max_tokens: 1,
-    top_p: 0,
-    logprobs: 10,
-  });
+  req.setMethod(HttpRequestMethod.Post);
+  req.setBody(
+    JSON.stringify({
+      prompt: `<|endoftext|>[${content}]\n--\nLabel:`,
+      temperature: 0,
+      max_tokens: 1,
+      top_p: 0,
+      logprobs: 10,
+    })
+  );
 
   const response = await http.request(req);
 
