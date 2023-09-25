@@ -4,7 +4,7 @@
 // which is a 3x3 representing the player craft inventory
 // key is defining the link between the tag and a specific item in minecraft
 // essentially key is the recipe, and result is the final item
-// for more recipes, refer to : https://minecraft.fandom.com/wiki/Recipe_book
+// for more recipes, refer to : https://minecraft.wiki/w/Recipe_book
 export default interface IRecipe {
   description: IRecipeDescription;
   tags: string[];
